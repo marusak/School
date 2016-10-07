@@ -1,5 +1,4 @@
 #include "imap.hh"
-
 #include <string.h>
 
 #include <fstream>
@@ -119,9 +118,18 @@ struct config createConfig(int argc, char* argv[]){
 int main(int argc, char* argv[]){
     struct config  config = createConfig(argc, argv);
 
-    IMAP imap = IMAP(config.server, config.port);
-    if (imap.error_happened())
+    IMAP con = IMAP();
+
+    if (config.imaps){
+        con.connect_to_server_s(config.server, config.port);
+    }else
+        con.connect_to_server(config.server, config.port);
+
+    if (con.error_happened())
         error("Connecting to server was unsuccessful.", 1);
+
+    if (config.imaps)
+        con.start_tls(); //try but ignore errors
 
     std::ifstream auth_file(config.auth_file);
     if (!auth_file.is_open())
@@ -143,13 +151,17 @@ int main(int argc, char* argv[]){
     else
         error("Invalid authentication file", 4);
 
-    if (imap.login(login, passwd))
+    if (con.login(login, passwd))
         error("Could not login to the server", 2);
 
-    imap.select("INBOX");
+    con.select("INBOX");
 
+    con.fetch("1:2", "BODY[TEXT]");
 
-    if (imap.logout())
+    if (con.logout())
         error("Could not logout from the server.", 5);
+
+    if (config.imaps)
+        con.stop_tls();
     return 0;
 }

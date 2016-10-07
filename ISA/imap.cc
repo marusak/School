@@ -8,6 +8,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "imap.hh"
 
 
@@ -15,8 +19,6 @@
 void IMAP::error(std::string err_msg, unsigned err_code){
     this->err_code = err_code;
     this->err_msg = err_msg;
-    std::cerr<<err_msg;
-    //exit (err_code);
 }
 
 /* Return true if error happened in the last action. */
@@ -34,11 +36,14 @@ void IMAP::clear_error(){
 
 /*Constructor:
  * set error code to 0
- * establish connection to server
  */
-IMAP::IMAP(std::string host, int port){
+IMAP::IMAP(){
     err_code = 0;
     message_id = 0;
+}
+
+bool IMAP::connect_to_server(std::string host, int port){
+    secure = false;
 
     hostent *H = gethostbyname(host.c_str());
     if (!H)
@@ -60,6 +65,38 @@ IMAP::IMAP(std::string host, int port){
         error("Cannot connect to server", 4);
 
     connection_sock = sock;
+    return error_happened();
+}
+
+bool IMAP::connect_to_server_s(std::string host, int port){
+    secure = true;
+
+    OpenSSL_add_all_algorithms();
+    OpenSSL_add_ssl_algorithms();
+    ERR_load_BIO_strings();
+    SSL_load_error_strings();
+
+    BIO *outbio;
+
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    if (!ctx)
+        error ("CTX failed", 5);
+    SSL *ssl;
+    if (! SSL_CTX_load_verify_locations(ctx, NULL, "/etc/ssl/certs")) //TODO path to certs
+        error("Could not load certificate", 4);
+    //TODO what to do with certfile?
+
+
+    outbio = BIO_new_ssl_connect(ctx);
+    BIO_get_ssl(outbio, & ssl);
+    SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
+
+    BIO_set_conn_hostname(outbio, (host+":"+std::to_string(port)).c_str());
+    if (BIO_do_connect(outbio) <= 0)
+        error(ERR_reason_error_string(ERR_get_error()), 5);
+
+    connection_sock_s = outbio;
+    return error_happened();
 }
 
 /*Login to the server*/
@@ -84,6 +121,8 @@ bool IMAP::message_ended(std::string msg, std::string id){
 
 
 std::string IMAP::communicate(std::string message){
+    if (secure)
+        return communicate_s(message);
     std::string msg_id;
     msg_id = "A"+std::to_string(message_id++);
     std::string msg = msg_id + " " + message+'\n';
@@ -103,15 +142,65 @@ std::string IMAP::communicate(std::string message){
     std::string final_answer = answer.substr(0, last_line_b - 1);
     std::size_t start_pos = msg_id.size() + 2;
     std::size_t found = command_completed.find("NO");
-    if (found == start_pos)
+    if (found+1 == start_pos)
         error(answer, 6);
     else {
         found = command_completed.find("BAD");
-        if (found == start_pos)
+        if (found+1 == start_pos)
             error(answer, 7);
     }
     return final_answer;
 }
+
+bool IMAP::start_tls(){
+    clear_error();
+    communicate_s("STARTTLS");
+    return error_happened();
+}
+
+bool IMAP::stop_tls(){
+    clear_error();
+    SSL_CTX_free(ctx);
+    return error_happened();
+}
+
+
+std::string IMAP::communicate_s(std::string message){
+    std::string msg_id;
+    msg_id = "A"+std::to_string(message_id++);
+    std::string msg = msg_id + " " + message+'\n';
+    while (BIO_write(connection_sock_s, msg.c_str(), msg.size()) <= 0)
+    {
+        if (! BIO_should_retry(connection_sock_s)){
+            error("Could not sent data to the server", 9);
+            break;
+        }
+    }
+
+    char buf[1000];
+    std::string answer{};
+    int recieved;
+
+    while ((recieved = BIO_read(connection_sock_s, buf, 1000))){
+        answer.append(buf, recieved);
+        if (message_ended(answer, msg_id) && recieved < 1000)
+            break;
+    }
+    std::size_t last_line_b = answer.find_last_of("\n", answer.size() - 2);
+    std::string command_completed = answer.substr(last_line_b + 1);
+    std::string final_answer = answer.substr(0, last_line_b - 1);
+    std::size_t start_pos = msg_id.size() + 2;
+    std::size_t found = command_completed.find("NO");
+    if (found+1 == start_pos)
+        error(answer, 6);
+    else {
+        found = command_completed.find("BAD");
+        if (found+1 == start_pos)
+            error(answer, 7);
+    }
+    return final_answer;
+}
+
 
 bool IMAP::logout(){
     clear_error();
@@ -123,5 +212,13 @@ void IMAP::select(std::string mailbox){
     clear_error();
     std::string answer;
     answer = communicate("SELECT " + mailbox);
+    std::cout<<answer<<std::endl;
+}
+
+void IMAP::fetch(std::string ids, std::string type){
+    std::cout<<"--------------\n";
+    clear_error();
+    std::string answer;
+    answer = communicate("FETCH " + ids + " " + type);
     std::cout<<answer<<std::endl;
 }
