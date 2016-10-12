@@ -215,12 +215,11 @@ std::string IMAP::select(std::string mailbox){
     return answer;
 }
 
-void IMAP::fetch(std::string ids, std::string type){
-    std::cout<<"--------------\n";
+std::string IMAP::fetch(std::string ids, std::string type){
     clear_error();
     std::string answer;
     answer = communicate("FETCH " + ids + " " + type);
-    std::cout<<answer<<std::endl;
+    return answer;
 }
 
 std::string IMAP::search(std::string args){
