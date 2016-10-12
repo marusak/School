@@ -208,11 +208,11 @@ bool IMAP::logout(){
     return error_happened();
 }
 
-void IMAP::select(std::string mailbox){
+std::string IMAP::select(std::string mailbox){
     clear_error();
     std::string answer;
     answer = communicate("SELECT " + mailbox);
-    std::cout<<answer<<std::endl;
+    return answer;
 }
 
 void IMAP::fetch(std::string ids, std::string type){
@@ -221,4 +221,11 @@ void IMAP::fetch(std::string ids, std::string type){
     std::string answer;
     answer = communicate("FETCH " + ids + " " + type);
     std::cout<<answer<<std::endl;
+}
+
+std::string IMAP::search(std::string args){
+    clear_error();
+    std::string answer;
+    answer = communicate("SEARCH " + args);
+    return answer;
 }
