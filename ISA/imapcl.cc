@@ -6,6 +6,10 @@
 #include <string>
 #include <algorithm>
 #include <map>
+#include <regex>
+
+#include <openssl/bio.h>
+#include <openssl/hmac.h>
 
 void error(std::string err_msg, int err_code){
     std::cerr<<err_msg<<std::endl;
@@ -24,6 +28,30 @@ struct config{
     std::string mailbox;
     std::string out_dir;
 };
+
+//TODO --help, base64, prilohy(aspon zmazat...)
+
+/* Decode base64 encoding
+ * http://www.ioncannon.net/programming/122/howto-base64-decode-with-cc-and-openssl/
+ * got inspired
+ */
+char *unbase64(unsigned char *input, int length){
+    BIO *b64, *bmem;
+
+    char *buffer = (char *)malloc(length);
+    memset(buffer, 0, length);
+
+    b64 = BIO_new(BIO_f_base64());
+    bmem = BIO_new_mem_buf(input, length);
+    bmem = BIO_push(b64, bmem);
+
+    BIO_read(bmem, buffer, length);
+
+    BIO_free_all(bmem);
+
+    return buffer;
+    //TODO should free(returned pointer)
+}
 
 
 /* Simple command line parser.
@@ -113,6 +141,16 @@ struct config createConfig(int argc, char* argv[]){
     return conf;
 }
 
+int get_next_message_bytes(const std::string& msg, std::regex r){
+    std::smatch match;
+    if (std::regex_search(msg.begin(), msg.end(), match, r))
+        return std::stoi(match[1]);
+    else{
+        error("Wrong return format from server", 8);
+        return 0;
+        }
+}
+
 
 int main(int argc, char* argv[]){
     struct config  config = createConfig(argc, argv);
@@ -194,12 +232,45 @@ int main(int argc, char* argv[]){
         }
 
 
-    //TODO if config.h -> head, else ALL or sth, renge first:last
-    //con.fetch(std::to_string(from) + ":" + std::to_string(to), INTERNALDATE);
-    //fetch
+    std::string req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)";
+    if (config.h)
+        req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])";
+    std::string fetch_ans = con.fetch(first + ":" + last, req_type);
+
+    while (fetch_ans[0] == '\n')
+        fetch_ans.erase(0, 1);
+
+    int n;
+    std::size_t top;
+    std::string head;
+    std::string body = "";
+    std::regex rf("\\* \\d* FETCH \\(.*\\)\\] \\{([0-9]*)\\}");
+    std::regex rb(".*\\{(\\d*)\\}");
+
+    while (fetch_ans.length() > 5){
+        while (fetch_ans[0] == '\n' || fetch_ans[0] == '\r')
+            fetch_ans.erase(0, 1);
+        n = get_next_message_bytes(fetch_ans, rf);
+        top = fetch_ans.find("\n") + 1;
+        head = fetch_ans.substr(top, n);
+        top += n + 1;
+        fetch_ans = fetch_ans.substr(top);
+        if (! config.h){
+            n = get_next_message_bytes(fetch_ans, rb);
+            top = fetch_ans.find("\n") + 1;
+            body = fetch_ans.substr(top, n);
+            top += n + 2;
+            if (top > fetch_ans.length())
+                top -= 1;
+            fetch_ans = fetch_ans.substr(top);
+        }
+        std::cout<<"\n-------------------MSG---------------\n";
+        std::cout<<head;
+        std::cout<<body;
+    }
+
     //save one by one to files
     //profit
-    //
 
     mailboxes[config.mailbox] = last;
 
