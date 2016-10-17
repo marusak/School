@@ -133,8 +133,10 @@ struct config createConfig(int argc, char* argv[]){
     else
         conf.mailbox = "INBOX";
 
-    if ((arg = getCmdOption(argv, argv + argc, "-o", true)))
+    if ((arg = getCmdOption(argv, argv + argc, "-o", true))){
         conf.out_dir = arg;
+        conf.out_dir += '/';
+    }
     else
         error("Output directory was not specified",4);
 
@@ -150,6 +152,17 @@ int get_next_message_bytes(const std::string& msg, std::regex r){
         return 0;
         }
 }
+
+std::string get_msg_uid(const std::string& msg, std::regex r){
+    std::smatch match;
+    if (std::regex_search(msg.begin(), msg.end(), match, r))
+        return match[1];
+    else{
+        error("Wrong return format from server", 8);
+        return 0;
+        }
+}
+
 
 
 int main(int argc, char* argv[]){
@@ -244,13 +257,19 @@ int main(int argc, char* argv[]){
     std::size_t top;
     std::string head;
     std::string body = "";
+    std::string uid;
+    std::string file_name = config.out_dir + login + '_' + config.server + '_';
+
+    std::ofstream out_msg;
+
     std::regex rf("\\* \\d* FETCH \\(.*\\)\\] \\{([0-9]*)\\}");
     std::regex rb(".*\\{(\\d*)\\}");
-
+    std::regex rn("\\* (\\d*) FETCH.*");
     while (fetch_ans.length() > 5){
         while (fetch_ans[0] == '\n' || fetch_ans[0] == '\r')
             fetch_ans.erase(0, 1);
         n = get_next_message_bytes(fetch_ans, rf);
+        uid = get_msg_uid(fetch_ans, rn);
         top = fetch_ans.find("\n") + 1;
         head = fetch_ans.substr(top, n);
         top += n + 1;
@@ -264,9 +283,11 @@ int main(int argc, char* argv[]){
                 top -= 1;
             fetch_ans = fetch_ans.substr(top);
         }
-        std::cout<<"\n-------------------MSG---------------\n";
-        std::cout<<head;
-        std::cout<<body;
+        out_msg.open(file_name+uid);
+        if (! out_msg.is_open())
+            error("Could not create output file", 11);
+        out_msg<<head<<body;
+        out_msg.close();
     }
 
     //save one by one to files
