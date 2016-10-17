@@ -27,9 +27,10 @@ struct config{
     std::string auth_file;
     std::string mailbox;
     std::string out_dir;
+    bool help;
 };
 
-//TODO --help, base64, prilohy(aspon zmazat...)
+//TODO base64, prilohy(aspon zmazat...)
 
 /* Decode base64 encoding
  * http://www.ioncannon.net/programming/122/howto-base64-decode-with-cc-and-openssl/
@@ -75,12 +76,26 @@ char *getCmdOption(char ** begin, char ** end, const std::string &option, bool v
     return 0;
 }
 
+void help(){
+    std::cout<<"IMAP client with TLS"<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<"Usage:"<<std::endl;
+    std::cout<<"     imapcl --help   -> show this help and exit\n";
+    std::cout<<"     imapcl  server [-p port] [-T [-c certfile] [-C certaddr]]";
+    std::cout<<"[-n] [-h] -a auth_file [-b MAILBOX] -o out_dir\n";
+    exit(0);
+}
+
 struct config createConfig(int argc, char* argv[]){
     struct config conf;
     char *arg;
 
     if (argc < 2)
-        error("Missing server", 6);
+        error("Wrong arguments, use --help to learn more.", 6);
+
+    if (getCmdOption(argv, argv + argc, "--help", false)){
+        help();
+    }
 
     conf.server = argv[1];
 
