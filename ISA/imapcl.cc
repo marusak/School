@@ -221,22 +221,9 @@ int main(int argc, char* argv[]){
 
     std::string mailbox_info = con.select(config.mailbox);
 
-    std::ifstream conf_file;
-    conf_file.open("/var/tmp/imapcl_file.conf");
-    std::map <std::string, std::string> mailboxes;
-    if (conf_file.is_open()){
-        std::string key;
-        std::string time;
-        while(getline(conf_file, key)){
-            getline(conf_file, time);
-            mailboxes[key] = time;
-        }
-    }
-    else
-        error("Could not open configuration file", 6);
-    conf_file.close();
-
     std::string search_string = "ALL";
+    if (config.n)
+        search_string = "UNSEEN";
 
     std::string all_msg_ids = con.search(search_string);
 
@@ -252,12 +239,6 @@ int main(int argc, char* argv[]){
     std::size_t last_space = all_msg_ids.rfind(" ");
     last = all_msg_ids.substr(last_space+1);
 
-    if (config.n)
-        if (mailboxes.find(config.mailbox) != mailboxes.end()){
-            first = mailboxes[config.mailbox];
-            if (first == last)
-                error("No new messages", 1);
-        }
 
 
     std::string req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)";
@@ -305,27 +286,11 @@ int main(int argc, char* argv[]){
         out_msg.close();
     }
 
-    //save one by one to files
-    //profit
-
-    mailboxes[config.mailbox] = last;
-
     if (con.logout())
         error("Could not logout from the server.", 5);
 
     if (config.imaps)
         con.stop_tls();
-
-    std::ofstream conf_file_w;
-    conf_file_w.open("/var/tmp/imapcl_file.conf", std::ios::trunc);
-    if (!conf_file_w.is_open())
-        error("Could not open configuration file", 5);
-
-    typedef std::map<std::string, std::string>::iterator item;
-    for (item iterator = mailboxes.begin(); iterator != mailboxes.end(); iterator++){
-        conf_file_w << iterator->first << std::endl;
-        conf_file_w << iterator->second << std::endl;
-    }
 
     return 0;
 }
