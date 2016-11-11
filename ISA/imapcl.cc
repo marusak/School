@@ -257,6 +257,8 @@ int main(int argc, char* argv[]){
     all_msg_ids.erase(0, 9);
     all_msg_ids.append(" ");
     std::string fetch_ans;
+
+    int count = 0;
     while ((pos= all_msg_ids.find(" ")) != std::string::npos){
         token = all_msg_ids.substr(0, pos);
         all_msg_ids.erase(0, pos + 1);
@@ -280,6 +282,7 @@ int main(int argc, char* argv[]){
             error("Could not create output file", 11);
         out_msg<<head<<body;
         out_msg.close();
+        count++;
     }
 
     if (con.logout())
@@ -287,6 +290,8 @@ int main(int argc, char* argv[]){
 
     if (config.imaps)
         con.stop_tls();
+
+    std::cout<<"Downloaded "<<count<<" message(s) from mailbox "<<config.mailbox<<"."<<std::endl;
 
     return 0;
 }
