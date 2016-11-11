@@ -189,7 +189,7 @@ std::string IMAP::communicate_s(std::string message){
     while ((recieved = BIO_read(connection_sock_s, buf, 1024))){
 
         answer.append(buf, recieved);
-        if (message_ended(answer, msg_id) && recieved < 1000)
+        if (message_ended(answer, msg_id))
             break;
     }
     std::size_t last_line_b = answer.find_last_of("\n", answer.size() - 2);
