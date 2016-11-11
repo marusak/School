@@ -157,6 +157,7 @@ std::string IMAP::communicate(std::string message){
 }
 
 bool IMAP::start_tls(){
+    stop_tls();
     clear_error();
     communicate_s("STARTTLS");
     return error_happened();
