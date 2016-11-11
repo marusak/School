@@ -113,9 +113,13 @@ bool IMAP::message_ended(std::string msg, std::string id){
         last_line = msg;
     else
          last_line = msg.substr(last_line_b + 1);
-    if (last_line[0] == 'A')
-        if (!strncmp(last_line.c_str(), id.c_str(), id.size()))
-            return true;
+    if (last_line[0] == 'A'){
+        if (!strncmp(last_line.c_str(), id.c_str(), id.size())){
+            if (last_line[id.size()] == ' '){
+                return true;
+            }
+        }
+    }
     return false;
 }
 
