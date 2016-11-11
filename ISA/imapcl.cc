@@ -233,21 +233,10 @@ int main(int argc, char* argv[]){
     std::size_t first_space = all_msg_ids.find(" ", 8);
     if (first_space == std::string::npos)
         error ("No messages to download", 1);
-    else
-        first = all_msg_ids.substr(first_space +1, all_msg_ids.find(" ", first_space + 1) - first_space -1);
-
-    std::size_t last_space = all_msg_ids.rfind(" ");
-    last = all_msg_ids.substr(last_space+1);
-
-
 
     std::string req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)";
     if (config.h)
         req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])";
-    std::string fetch_ans = con.fetch(first + ":" + last, req_type);
-
-    while (fetch_ans[0] == '\n')
-        fetch_ans.erase(0, 1);
 
     int n;
     std::size_t top;
@@ -258,14 +247,21 @@ int main(int argc, char* argv[]){
 
     std::ofstream out_msg;
 
+    size_t pos = 0;
+    std::string token;
+
     std::regex rf("\\* \\d* FETCH \\(.*\\)\\] \\{([0-9]*)\\}");
     std::regex rb(".*\\{(\\d*)\\}");
     std::regex rn("\\* (\\d*) FETCH.*");
-    while (fetch_ans.length() > 5){
-        while (fetch_ans[0] == '\n' || fetch_ans[0] == '\r')
-            fetch_ans.erase(0, 1);
+
+    all_msg_ids.erase(0, 9);
+    all_msg_ids.append(" ");
+    std::string fetch_ans;
+    while ((pos= all_msg_ids.find(" ")) != std::string::npos){
+        token = all_msg_ids.substr(0, pos);
+        all_msg_ids.erase(0, pos + 1);
+        fetch_ans = con.fetch(token, req_type);
         n = get_next_message_bytes(fetch_ans, rf);
-        uid = get_msg_uid(fetch_ans, rn);
         top = fetch_ans.find("\n") + 1;
         head = fetch_ans.substr(top, n);
         top += n + 1;
@@ -279,7 +275,7 @@ int main(int argc, char* argv[]){
                 top -= 1;
             fetch_ans = fetch_ans.substr(top);
         }
-        out_msg.open(file_name+uid);
+        out_msg.open(file_name+token);
         if (! out_msg.is_open())
             error("Could not create output file", 11);
         out_msg<<head<<body;
