@@ -133,12 +133,12 @@ std::string IMAP::communicate(std::string message){
     if (send(connection_sock, msg.c_str(), msg.size(), 0) == -1)
         error("Cannot sent a message",5);
 
-    char buf[1000];
+    char buf[1024];
     std::string answer{};
     int recieved;
-    while ((recieved = recv(connection_sock, buf, 1000, 0))){
+    while ((recieved = recv(connection_sock, buf, 1024, 0))){
         answer.append(buf, recieved);
-        if (message_ended(answer, msg_id) && recieved < 1000)
+        if (message_ended(answer, msg_id) && recieved < 1024)
             break;
     }
     std::size_t last_line_b = answer.find_last_of("\n", answer.size() - 2);
@@ -182,11 +182,12 @@ std::string IMAP::communicate_s(std::string message){
         }
     }
 
-    char buf[1000];
+    char buf[1024];
     std::string answer{};
     int recieved;
 
-    while ((recieved = BIO_read(connection_sock_s, buf, 1000))){
+    while ((recieved = BIO_read(connection_sock_s, buf, 1024))){
+
         answer.append(buf, recieved);
         if (message_ended(answer, msg_id) && recieved < 1000)
             break;
