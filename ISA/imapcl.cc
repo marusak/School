@@ -244,6 +244,7 @@ int main(int argc, char* argv[]){
     std::string body = "";
     std::string uid;
     std::string file_name = config.out_dir + login + '_' + config.server + '_';
+    file_name += config.mailbox + '_';
 
     std::ofstream out_msg;
 
