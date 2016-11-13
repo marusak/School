@@ -7,3 +7,5 @@ imap.o : imap.cc imap.hh
 imapcl.o : imapcl.cc imap.hh
 	clang++ -std=gnu++11 -Wall -Wextra -c -o imapcl.o imapcl.cc
 
+clean:
+	rm *.o imapcl
