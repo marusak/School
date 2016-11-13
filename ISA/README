@@ -1,0 +1,48 @@
+imapcl
+IMAP klient s podporou TLS
+
+Autor: Matej Marušák, xmarus06@stud,fit,vutbr.cz
+Datum: 13.11.2016
+
+Popis:
+Tento program slúži na čítanie elektornickej pošty cez protokol IMAP. Program
+po spustení stiahne správy uložené na servery a uloží ich do zadaného
+priečinku (každú správu zvlásť). Na štandardný výstup vypíše počet stihanutých
+správ. Šíroké spektrum parametrov umožnuje impliictné správanie meniť.
+
+Zoznam súborov:
+    Makefile    - preloženie projektu
+    imap.hh     - knižnica definujúca potrebnú IMAP funkcionalitu
+    imap.cc     - implementácia imap.hh
+    imapcl.cc   - samotný klient
+
+Preklad:
+    $make       - prelož projekt
+    $make clean - vymaž preložený projekt
+    $make tar   - vytvor .tar archív
+
+
+Spustenie:
+    $imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth_file [-b MAILBOX] -o out_dir
+    Poradie argumentov je ľubovoľné. Popis argumentov:
+
+    Povinne je uvedený názov serveru (IP adresa, alebo doménové meno) požadovaného zdroja.
+    Voliteľný parameter -p port špecifikuje číslo portu na servery.
+    Parameter -T zapína šifrovanie.
+    Voliteľný parameter -c súbor s certifikátmi, ktorý sa použije pre overenie platnosti
+        certifikátu SSL/TLS predloženého serverom.
+    Voliteľný parameter -C určuje adresár, v ktorom sa majú hľadať certifikáty, ktoré sa
+        použijú pre overenie platnosti certifikátu SSL/TLS predloženého serverom. Implicitná hodnota je
+        /etc/ssl/certs.
+    Pri použití parametru -n sa sťahujú iba nové správy.
+    Pri použití parametru -h se sťahujú iba hlavičky správ.
+    Parameter -a auth\_file zadáva cestu k autentifikačnému súbor. Jeho štruktúra je
+        zobrazená nižšie.
+    Parameter -b špecifikuje názov schránky s ktorou sa bude pracovať. Implicitná hodnota
+        je INBOX.
+    Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté
+        správy.
+
+Výstup:
+    1) Na štandarný výstup sa vypíše počet (N) stiahnutých správ .
+    2) V priečinku zadanom pri spúšaný sa vytvorý N nových súborov.
