@@ -8,4 +8,7 @@ imapcl.o : imapcl.cc imap.hh
 	clang++ -std=gnu++11 -Wall -Wextra -c -o imapcl.o imapcl.cc
 
 clean:
-	rm *.o imapcl
+	rm *.o imapcl xmarus06.tar
+
+tar:
+	tar -cf xmarus06.tar Makefile imapcl.cc imap.cc imap.hh README manual.pdf
