@@ -68,7 +68,7 @@ bool IMAP::connect_to_server(std::string host, int port){
     return error_happened();
 }
 
-bool IMAP::connect_to_server_s(std::string host, int port){
+bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std::string dir){
     secure = true;
 
     OpenSSL_add_all_algorithms();
@@ -77,14 +77,12 @@ bool IMAP::connect_to_server_s(std::string host, int port){
     SSL_load_error_strings();
 
     BIO *outbio;
-
     ctx = SSL_CTX_new(SSLv23_client_method());
     if (!ctx)
         error ("CTX failed", 5);
     SSL *ssl;
-    if (! SSL_CTX_load_verify_locations(ctx, NULL, "/etc/ssl/certs")) //TODO path to certs
+    if (! SSL_CTX_load_verify_locations(ctx, (file.empty() ? NULL: file.c_str()), (dir.empty() ? NULL : dir.c_str())))
         error("Could not load certificate", 4);
-    //TODO what to do with certfile?
 
 
     outbio = BIO_new_ssl_connect(ctx);

@@ -105,11 +105,14 @@ struct config createConfig(int argc, char* argv[]){
         if ((arg = getCmdOption(argv, argv + argc, "-c", true)))
             conf.certfile = arg;
         else
-            conf.certfile = "TODO"; //TODO
+            conf.certfile = "";
         if ((arg = getCmdOption(argv, argv + argc, "-C", true)))
             conf.certaddr = arg;
-        else
+        else if (conf.certfile == "")
             conf.certaddr = "/etc/ssl/certs";
+        else
+            conf.certaddr = "";
+
     }
     else
         conf.imaps = false;
@@ -186,7 +189,7 @@ int main(int argc, char* argv[]){
     IMAP con = IMAP();
 
     if (config.imaps){
-        con.connect_to_server_s(config.server, config.port);
+        con.connect_to_server_s(config.server, config.port, config.certfile, config.certaddr);
     }else
         con.connect_to_server(config.server, config.port);
 
