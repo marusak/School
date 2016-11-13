@@ -6,6 +6,7 @@
 
 #include <netdb.h> //hostent, gethostbyname
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/types.h>
 
 #include <openssl/bio.h>
@@ -55,7 +56,7 @@ bool IMAP::connect_to_server(std::string host, int port){
         error("Can not create socket", 3);
 
     //Create sockaddr_in (socket on server)
-    sockaddr_in server_sock;
+    struct sockaddr_in server_sock;
     server_sock.sin_family = AF_INET;
     server_sock.sin_port = htons(port);
     memcpy(&(server_sock.sin_addr), H->h_addr, H->h_length);
