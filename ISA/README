@@ -8,7 +8,8 @@ Popis:
 Tento program slúži na čítanie elektornickej pošty cez protokol IMAP. Program
 po spustení stiahne správy uložené na servery a uloží ich do zadaného
 priečinku (každú správu zvlásť). Na štandardný výstup vypíše počet stihanutých
-správ. Šíroké spektrum parametrov umožnuje impliictné správanie meniť.
+správ. Všetky stiahnuté správy sú označené ako videné. Široké spektrum
+parametrov umožnuje impliictné správanie meniť.
 
 Zoznam súborov:
     Makefile    - preloženie projektu
@@ -35,7 +36,7 @@ Spustenie:
         použijú pre overenie platnosti certifikátu SSL/TLS predloženého serverom. Implicitná hodnota je
         /etc/ssl/certs.
     Pri použití parametru -n sa sťahujú iba nové správy.
-    Pri použití parametru -h se sťahujú iba hlavičky správ.
+    Pri použití parametru -h se sťahujú iba hlavičky správ. Nenastavujú sa správy ako videné.
     Parameter -a auth\_file zadáva cestu k autentifikačnému súbor. Jeho štruktúra je
         zobrazená nižšie.
     Parameter -b špecifikuje názov schránky s ktorou sa bude pracovať. Implicitná hodnota

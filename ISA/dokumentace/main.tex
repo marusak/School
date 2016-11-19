@@ -74,7 +74,10 @@ Najskôr server posiela dáta, o ktoré bolo požiadané. Správu ukončí tagom
 Príklad: A123 OK LOGIN completed
 
 \subsection{Ukladanie správ}
-Za pomoci FETCH požiadavky server posiela správy. Tieto správy je potrebné uložiť do súborov. Každá správa do jedného súboru. Je preto potrebné vytvárať unikátne názvy súborov. Ako vhodný kandidát sa črtá kombinácia \texttt{užívateľ@mail\_mailbox\_unikátny\_idetifikátor\_správy}. Jedná sa o pomerne zložitý a dlhý názov, preto by bolo možné vypočítať hash tohto názvu. Takýto prístup by ale znamenal veľmi obtiažne vyhľadávanie správ užívateľom.
+Za pomoci FETCH požiadavky server posiela správy. Tieto správy je potrebné uložiť do súborov. Každá správa do jedného súboru. Je preto potrebné vytvárať unikátne názvy súborov. Ako vhodný kandidát sa črtá kombinácia \texttt{užívateľ@mail\_mailbox\_unikátny\_idetifikátor\_správy}. Jedná sa o pomerne zložitý a dlhý názov, preto by bolo možné vypočítať hash tohto názvu. Takýto prístup by ale znamenal veľmi obtiažne vyhľadávanie správ užívateľom.\\
+\subsubsection{Obsah správ}
+Implementovaný klient by mal dodržovať dobré zvyky, ktoré sú štandardom u iných imap klientov. Teda načítať všetky hlavičky s najmenším množstvom potrebných dát a až následne načítať celé tie správy, ktoré sa užívateľ rozhodne si prečítať.\\
+Preto pri použítí voľby -h,  sa stiahnu iba základné informácie (hlavne teda odosielateľ, dátum odoslania, názov správy a pod.). Pri zvolení stiahnutia celých správ sa stiahne čo najviac údajov vrátane príloh a všetkých dostupných informácií. Rovnako sa takáto správa označí ako prečítaná.
 
 \section{Implemetnácia}
 Ako implemetnačný jazyk bolo zvolené C++. Oproti C bolo vybrané vďaka podpore reťazcov a objektovému programovaniu, čo umožnovalo krajší návrh a jednoduchšiu implementáciu.\\
@@ -87,7 +90,7 @@ Nasleduje výpis metód implementovaných v knižnici. Pri metódach, ktoré pos
 \item\texttt{login(name, password)} - Prihlásenie sa ako užívateľ. Príkaz správy je \texttt{LOGIN name password}.\\
 \item\texttt{logout()} - Odhlásenie sa. Príkaz správy je {LOGOUT}.\\
 \item\texttt{select(mailbox)} - Výber schránky. Príkaz správy je \texttt{SELECT mailbox}\\
-\item\texttt{fetch(ids, type} - Stiahnutie správ. Arguments \texttt{ids} sú dve čísla oddelené dvojbotkou ak sa jedná o rozsah čísel, prípadne samostatné číslo. Argument \texttt{type} je požiadavka na typ správy, ktorú chceme získať. Príkaz správy je \texttt{FETCH ids (BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)} v prípade získavania celých správ a \textt{FETCH ids (BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])} v prípade získavania iba hlavičiek správ.\\
+\item\texttt{fetch(ids, type} - Stiahnutie správ. Arguments \texttt{ids} sú dve čísla oddelené dvojbotkou ak sa jedná o rozsah čísel, prípadne samostatné číslo. Argument \texttt{type} je požiadavka na typ správy, ktorú chceme získať. Príkaz správy je \texttt{FETCH ids RFC822} v prípade získavania celých správ a \textt{FETCH ids (BODY.PEEK[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])} v prípade získavania iba hlavičiek správ.\\
 \item\texttt{search(type)} - Vyhľadá všetky správy, ktoré vyhovujú \texttt{types}. Príkaz správy je \texttt{SEARCH ALL} v prípade sťahovania všetkých správ a \texttt{SEARCH UNSEEN} v prípade sťahovania nových správ.\\
 \item\texttt{communicate(message)} - Komunikácia so serverom. Odošle správu \texttt{message} a získa odpoveď. Danú odpoveď od serveru vracia volateľovi.\\
 \item\texttt{communicate\_secure(message)} - Obdoba \texttt{communicate} avšak na zabezpečené spojenie. Využíva BIO\_read a BIO\_write na poslanie dát serveru a prijatie odpovede.\\
@@ -127,7 +130,7 @@ kde \textit{meno} a \textit{heslo} sa nahradí konkrétnimi hodnotami.
 
 \end{itemize}
 \section{Záver}
-CHYBA, ROZISRENIE (DEKODOVANIE)\\
+Implementovaný klient pracuje spoľahlivo. Testovaný bol na troch serveroch (eva.fit.vutbr.cz, seznam.cz, gmail.com). Klient sťahuje správy podľa zadania a ukladá ich v navrhnutom formáte, ktorý je popísaný v sekcii 3.4.1.
 \section{Metriky kódu}
 Počet súborov:      4\\
 Počet riadkov kódu: 582\\
