@@ -43,6 +43,12 @@ IMAP::IMAP(){
     message_id = 0;
 }
 
+/*
+ * Connect to the server.
+ *
+ * host - name of server
+ * port - port to connect through
+ */
 bool IMAP::connect_to_server(std::string host, int port){
     secure = false;
 
@@ -69,6 +75,14 @@ bool IMAP::connect_to_server(std::string host, int port){
     return error_happened();
 }
 
+/*
+ * Connect to the server securely.
+ *
+ * host - name of server
+ * port - port to connect through
+ * file - certificate file
+ * dir  - certificate directory
+ */
 bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std::string dir){
     secure = true;
 
@@ -82,14 +96,16 @@ bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std
     if (!ctx)
         error ("CTX failed", 5);
     SSL *ssl;
+    //Load certificate
     if (! SSL_CTX_load_verify_locations(ctx, (file.empty() ? NULL: file.c_str()), (dir.empty() ? NULL : dir.c_str())))
         error("Could not load certificate", 4);
 
-
+    //New connection
     outbio = BIO_new_ssl_connect(ctx);
     BIO_get_ssl(outbio, & ssl);
     SSL_set_mode(ssl, SSL_MODE_AUTO_RETRY);
 
+    //Connect
     BIO_set_conn_hostname(outbio, (host+":"+std::to_string(port)).c_str());
     if (BIO_do_connect(outbio) <= 0)
         error(ERR_reason_error_string(ERR_get_error()), 5);
@@ -105,13 +121,21 @@ bool IMAP::login(std::string login, std::string password){
     return error_happened();
 }
 
+/*
+ * Test if incoming message ended.
+ *
+ * msg - recieved message so far
+ * id  - messages id
+ */
 bool IMAP::message_ended(std::string msg, std::string id){
     std::string last_line;
+    //Get last line of message
     std::size_t last_line_b = msg.find_last_of("\n", msg.size() - 2);
     if (last_line_b == std::string::npos)
         last_line = msg;
     else
          last_line = msg.substr(last_line_b + 1);
+    //Test if last line begins with message id
     if (last_line[0] == 'A'){
         if (!strncmp(last_line.c_str(), id.c_str(), id.size())){
             if (last_line[id.size()] == ' '){
@@ -122,24 +146,34 @@ bool IMAP::message_ended(std::string msg, std::string id){
     return false;
 }
 
-
+/*
+ * Communicate with server.
+ *
+ * message - message to be sent to the server
+ *
+ * Sends the message and return message that was answered from server.
+ */
 std::string IMAP::communicate(std::string message){
     if (secure)
         return communicate_s(message);
     std::string msg_id;
+    //Append new message id
     msg_id = "A"+std::to_string(message_id++);
     std::string msg = msg_id + " " + message+'\n';
+    //Send the message
     if (send(connection_sock, msg.c_str(), msg.size(), 0) == -1)
         error("Cannot sent a message",5);
 
     char buf[1024];
     std::string answer{};
     int recieved;
+    //Read the answer
     while ((recieved = recv(connection_sock, buf, 1024, 0))){
         answer.append(buf, recieved);
         if (message_ended(answer, msg_id) && recieved < 1024)
             break;
     }
+    //Parse the answer - if succeeded or not and remove all unnecessary items
     std::size_t last_line_b = answer.find_last_of("\n", answer.size() - 2);
     std::string command_completed = answer.substr(last_line_b + 1);
     std::string final_answer = answer.substr(0, last_line_b - 1);
@@ -155,6 +189,9 @@ std::string IMAP::communicate(std::string message){
     return final_answer;
 }
 
+/*
+ * Starts TLS with the server
+ */
 bool IMAP::start_tls(){
     stop_tls();
     clear_error();
@@ -162,13 +199,20 @@ bool IMAP::start_tls(){
     return error_happened();
 }
 
+/*
+ * Ends TLS with the server
+ */
 bool IMAP::stop_tls(){
     clear_error();
     SSL_CTX_free(ctx);
     return error_happened();
 }
 
-
+/*
+ * Communicate with the server securely.
+ *
+ * See communicate method for better understanding.
+ */
 std::string IMAP::communicate_s(std::string message){
     std::string msg_id;
     msg_id = "A"+std::to_string(message_id++);
@@ -206,13 +250,20 @@ std::string IMAP::communicate_s(std::string message){
     return final_answer;
 }
 
-
+/*
+ * Logout from the account.
+ */
 bool IMAP::logout(){
     clear_error();
     communicate("LOGOUT");
     return error_happened();
 }
 
+/*
+ * Select mailbox to work with.
+ *
+ * mailbox - name of the mailbox
+ */
 std::string IMAP::select(std::string mailbox){
     clear_error();
     std::string answer;
@@ -220,6 +271,12 @@ std::string IMAP::select(std::string mailbox){
     return answer;
 }
 
+/*
+ * Get one or range of messages from server.
+ *
+ * ids  - id or range od ids of messages to fetch
+ * type - type of data to fatch
+ */
 std::string IMAP::fetch(std::string ids, std::string type){
     clear_error();
     std::string answer;
@@ -227,6 +284,11 @@ std::string IMAP::fetch(std::string ids, std::string type){
     return answer;
 }
 
+/*
+ * Find all message ids that follow some condition.
+ *
+ * args - condition by which messages are selected
+ */
 std::string IMAP::search(std::string args){
     clear_error();
     std::string answer;

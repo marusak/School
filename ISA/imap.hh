@@ -1,6 +1,10 @@
 #include <string>
 #include <openssl/bio.h>
 
+/*This is only header file. For more information see imap.cc, especially
+ * functions' description.
+ */
+
 class IMAP
 {
     public:

@@ -11,11 +11,16 @@
 #include <openssl/bio.h>
 #include <openssl/hmac.h>
 
+/*Print error and exit.
+ */
 void error(std::string err_msg, int err_code){
     std::cerr<<err_msg<<std::endl;
     exit(err_code);
 }
 
+/*
+ * Structure to hold all command line arguments.
+ */
 struct config{
     std::string server;
     int port;
@@ -30,34 +35,11 @@ struct config{
     bool help;
 };
 
-//TODO base64, prilohy(aspon zmazat...)
-
-/* Decode base64 encoding
- * http://www.ioncannon.net/programming/122/howto-base64-decode-with-cc-and-openssl/
- * got inspired
- */
-char *unbase64(unsigned char *input, int length){
-    BIO *b64, *bmem;
-
-    char *buffer = (char *)malloc(length);
-    memset(buffer, 0, length);
-
-    b64 = BIO_new(BIO_f_base64());
-    bmem = BIO_new_mem_buf(input, length);
-    bmem = BIO_push(b64, bmem);
-
-    BIO_read(bmem, buffer, length);
-
-    BIO_free_all(bmem);
-
-    return buffer;
-    //TODO should free(returned pointer)
-}
-
 
 /* Simple command line parser.
- * Shamelessly stolen and improved from
+ * Inspired on:
  * http://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
+ * and edited
  */
 char *getCmdOption(char ** begin, char ** end, const std::string &option, bool value){
     char ** itr = std::find(begin, end, option);
@@ -76,6 +58,9 @@ char *getCmdOption(char ** begin, char ** end, const std::string &option, bool v
     return 0;
 }
 
+/*
+ * Print help and exit.
+ */
 void help(){
     std::cout<<"IMAP client with TLS"<<std::endl;
     std::cout<<std::endl;
@@ -86,6 +71,15 @@ void help(){
     exit(0);
 }
 
+/*
+ * Parse all command line argumets.
+ *
+ * argc - number of arguments
+ * argv - list of all arguments
+ *
+ * Creates config structure, fills it with passed or default values and
+ *  and returnes it.
+ */
 struct config createConfig(int argc, char* argv[]){
     struct config conf;
     char *arg;
@@ -93,6 +87,7 @@ struct config createConfig(int argc, char* argv[]){
     if (argc < 2)
         error("Wrong arguments, use --help to learn more.", 6);
 
+    //Read help
     if (getCmdOption(argv, argv + argc, "--help", false)){
         help();
     }
@@ -131,26 +126,31 @@ struct config createConfig(int argc, char* argv[]){
     else
         conf.port = 143;
 
+    //Only new messages
     if (getCmdOption(argv, argv + argc, "-n", false))
         conf.n = true;
     else
         conf.n = false;
 
+    //Only message heads
     if (getCmdOption(argv, argv + argc, "-h", false))
         conf.h = true;
     else
         conf.h = false;
 
+    //Authentication file
     if ((arg = getCmdOption(argv, argv + argc, "-a", true)))
         conf.auth_file = arg;
     else
         error("Authentication file was not specified",4);
 
+    //Mailbox
     if ((arg = getCmdOption(argv, argv + argc, "-b", true)))
         conf.mailbox = arg;
     else
         conf.mailbox = "INBOX";
 
+    //Output directory
     if ((arg = getCmdOption(argv, argv + argc, "-o", true))){
         conf.out_dir = arg;
         conf.out_dir += '/';
@@ -161,6 +161,15 @@ struct config createConfig(int argc, char* argv[]){
     return conf;
 }
 
+/*
+ * Read the length of following message.
+ *
+ * msg - message from which to get the length
+ * r   - regular expression for matching the message style
+ *
+ * Each message contains its lenght, and it needs to be parser in order to
+ *  be able to read the whole message.
+ */
 int get_next_message_bytes(const std::string& msg, std::regex r){
     std::smatch match;
     if (std::regex_search(msg.begin(), msg.end(), match, r))
@@ -171,6 +180,11 @@ int get_next_message_bytes(const std::string& msg, std::regex r){
         }
 }
 
+/*
+ * Read message identification.
+ *
+ * Works similiar to get_next_message_bytes - see for better understanding.
+ */
 std::string get_msg_uid(const std::string& msg, std::regex r){
     std::smatch match;
     if (std::regex_search(msg.begin(), msg.end(), match, r))
@@ -182,12 +196,11 @@ std::string get_msg_uid(const std::string& msg, std::regex r){
 }
 
 
-
 int main(int argc, char* argv[]){
     struct config  config = createConfig(argc, argv);
 
     IMAP con = IMAP();
-
+    //Connect to server
     if (config.imaps){
         con.connect_to_server_s(config.server, config.port, config.certfile, config.certaddr);
     }else
@@ -196,9 +209,11 @@ int main(int argc, char* argv[]){
     if (con.error_happened())
         error("Connecting to server was unsuccessful.", 1);
 
+    //Start TLS
     if (config.imaps)
-        con.start_tls(); //try but ignore errors
+        con.start_tls();
 
+    //Login in
     std::ifstream auth_file(config.auth_file);
     if (!auth_file.is_open())
         error("Authentication file does not exist",9);
@@ -222,8 +237,10 @@ int main(int argc, char* argv[]){
     if (con.login(login, passwd))
         error("Could not login to the server", 2);
 
+    //Select mailbox
     std::string mailbox_info = con.select(config.mailbox);
 
+    //Find messages based on criteria from command line
     std::string search_string = "ALL";
     if (config.n)
         search_string = "UNSEEN";
@@ -237,6 +254,7 @@ int main(int argc, char* argv[]){
     if (first_space == std::string::npos)
         error ("No messages to download", 1);
 
+    //Specify type of downloading content
     std::string req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)";
     if (config.h)
         req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])";
@@ -262,6 +280,7 @@ int main(int argc, char* argv[]){
     all_msg_ids.append(" ");
     std::string fetch_ans;
 
+    //Download all messages
     int count = 0;
     while ((pos= all_msg_ids.find(" ")) != std::string::npos){
         token = all_msg_ids.substr(0, pos);
@@ -289,12 +308,15 @@ int main(int argc, char* argv[]){
         count++;
     }
 
-    if (con.logout())
-        error("Could not logout from the server.", 5);
-
+    //Stop TLS
     if (config.imaps)
         con.stop_tls();
 
+    //Logout
+    if (con.logout())
+        error("Could not logout from the server.", 5);
+
+    //Inform about downloaded messages
     std::cout<<"Downloaded "<<count<<" message(s) from mailbox "<<config.mailbox<<"."<<std::endl;
 
     return 0;
