@@ -235,6 +235,8 @@ int main(int argc, char* argv[]){
 
     //Select mailbox
     std::string mailbox_info = con.select(config.mailbox);
+    if (con.error_happened())
+        error("Not valid mailbox name", 11);
 
     //Find messages based on criteria from command line
     std::string search_string = "ALL";
