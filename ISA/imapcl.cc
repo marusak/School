@@ -209,10 +209,6 @@ int main(int argc, char* argv[]){
     if (con.error_happened())
         error("Connecting to server was unsuccessful.", 1);
 
-    //Start TLS
-    if (config.imaps)
-        con.start_tls();
-
     //Login in
     std::ifstream auth_file(config.auth_file);
     if (!auth_file.is_open())
@@ -307,10 +303,6 @@ int main(int argc, char* argv[]){
         out_msg.close();
         count++;
     }
-
-    //Stop TLS
-    if (config.imaps)
-        con.stop_tls();
 
     //Logout
     if (con.logout())

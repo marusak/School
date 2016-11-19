@@ -189,24 +189,6 @@ std::string IMAP::communicate(std::string message){
     return final_answer;
 }
 
-/*
- * Starts TLS with the server
- */
-bool IMAP::start_tls(){
-    stop_tls();
-    clear_error();
-    communicate_s("STARTTLS");
-    return error_happened();
-}
-
-/*
- * Ends TLS with the server
- */
-bool IMAP::stop_tls(){
-    clear_error();
-    SSL_CTX_free(ctx);
-    return error_happened();
-}
 
 /*
  * Communicate with the server securely.
