@@ -15,6 +15,7 @@ class IMAP
         bool error_happened();
         bool login(std::string login, std::string password);
         bool logout();
+        std::string get_error();
         std::string select(std::string mailbox);
         std::string fetch(std::string ids, std::string type);
         std::string search(std::string args);

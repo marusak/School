@@ -207,7 +207,7 @@ int main(int argc, char* argv[]){
         con.connect_to_server(config.server, config.port);
 
     if (con.error_happened())
-        error("Connecting to server was unsuccessful.", 1);
+        error("Connecting to server was unsuccessful.\n"+con.get_error(), 1);
 
     //Login in
     std::ifstream auth_file(config.auth_file);

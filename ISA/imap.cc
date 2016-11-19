@@ -30,6 +30,13 @@ bool IMAP::error_happened(){
         return false;
 }
 
+/*
+ * Return last error message.
+ */
+std::string IMAP::get_error(){
+    return this->err_msg;
+}
+
 void IMAP::clear_error(){
     err_code = 0;
     err_msg = "";
