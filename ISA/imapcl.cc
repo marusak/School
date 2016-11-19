@@ -251,9 +251,9 @@ int main(int argc, char* argv[]){
         error ("No messages to download", 1);
 
     //Specify type of downloading content
-    std::string req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)] RFC822.TEXT)";
+    std::string req_type = "RFC822";
     if (config.h)
-        req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT  CC BCC MESSAGE-ID)])";
+        req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT CC BCC MESSAGE-ID)])";
 
     int n;
     std::size_t top;
@@ -282,24 +282,15 @@ int main(int argc, char* argv[]){
         token = all_msg_ids.substr(0, pos);
         all_msg_ids.erase(0, pos + 1);
         fetch_ans = con.fetch(token, req_type);
-        n = get_next_message_bytes(fetch_ans, rf);
+        n = get_next_message_bytes(fetch_ans, rb);
         top = fetch_ans.find("\n") + 1;
-        head = fetch_ans.substr(top, n);
+        body = fetch_ans.substr(top, n);
         top += n + 1;
         fetch_ans = fetch_ans.substr(top);
-        if (! config.h){
-            n = get_next_message_bytes(fetch_ans, rb);
-            top = fetch_ans.find("\n") + 1;
-            body = fetch_ans.substr(top, n);
-            top += n + 2;
-            if (top > fetch_ans.length())
-                top -= 1;
-            fetch_ans = fetch_ans.substr(top);
-        }
         out_msg.open(file_name+token);
         if (! out_msg.is_open())
             error("Could not create output file", 11);
-        out_msg<<head<<body;
+        out_msg<<body;
         out_msg.close();
         count++;
     }
