@@ -172,7 +172,7 @@ std::string IMAP::communicate(std::string message){
     std::string msg_id;
     //Append new message id
     msg_id = "A"+std::to_string(message_id++);
-    std::string msg = msg_id + " " + message+'\n';
+    std::string msg = msg_id + " " + message+"\r\n";
     //Send the message
     if (send(connection_sock, msg.c_str(), msg.size(), 0) == -1)
         error("Cannot sent a message",5);
@@ -211,7 +211,7 @@ std::string IMAP::communicate(std::string message){
 std::string IMAP::communicate_s(std::string message){
     std::string msg_id;
     msg_id = "A"+std::to_string(message_id++);
-    std::string msg = msg_id + " " + message+'\n';
+    std::string msg = msg_id + " " + message+"\r\n";
     while (BIO_write(connection_sock_s, msg.c_str(), msg.size()) <= 0)
     {
         if (! BIO_should_retry(connection_sock_s)){
