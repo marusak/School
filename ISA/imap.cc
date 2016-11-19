@@ -255,6 +255,16 @@ bool IMAP::logout(){
 }
 
 /*
+ * Cleanup before exiting.
+ */
+void IMAP::finish(){
+    if (secure){
+        BIO_free_all(connection_sock_s);
+        SSL_CTX_free(ctx);
+    }
+}
+
+/*
  * Select mailbox to work with.
  *
  * mailbox - name of the mailbox

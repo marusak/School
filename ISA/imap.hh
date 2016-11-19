@@ -12,6 +12,7 @@ class IMAP
         bool connect_to_server(std::string server, int port);
         bool connect_to_server_s(std::string server, int port, std::string file, std::string dir);
         void error(std::string err_msg, unsigned err_code);
+        void finish();
         bool error_happened();
         bool login(std::string login, std::string password);
         bool logout();

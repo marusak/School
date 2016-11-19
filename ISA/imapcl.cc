@@ -304,5 +304,7 @@ int main(int argc, char* argv[]){
     //Inform about downloaded messages
     std::cout<<"Downloaded "<<count<<" message(s) from mailbox "<<config.mailbox<<"."<<std::endl;
 
+    con.finish();
+
     return 0;
 }
