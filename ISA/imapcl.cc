@@ -255,7 +255,7 @@ int main(int argc, char* argv[]){
     //Specify type of downloading content
     std::string req_type = "RFC822";
     if (config.h)
-        req_type = "(BODY[HEADER.FIELDS (DATE FROM TO SUBJECT CC BCC MESSAGE-ID)])";
+        req_type = "(BODY.PEEK[HEADER.FIELDS (DATE FROM TO SUBJECT CC BCC MESSAGE-ID)])";
 
     int n;
     std::size_t top;
