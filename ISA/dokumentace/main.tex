@@ -39,11 +39,11 @@ Autor: Matej Marušák, xmarus06@stud.fit.vutbr.cz
 \pagebreak
 
 \section{Úvod}
-Tento dokument sa venuje poštovému protokolu IMAP a implementácii klienta nad daným protokolom s podporou TSL. V kapitole 2 definujem základné pojmy a princípy, ktoré budem neskôr v texte využivať a odkazovať sa na ne. Kapitola 3 navrhuje klienta, v kapitole 4 je tento návrh impelementovaný. Kapitola 5 popisuje používanie tohto kódu. Text je ukončený zhrnutím v kapitole 6.
+Tento dokument sa venuje poštovému protokolu IMAP a implementácii klienta nad daným protokolom s podporou TLS. V kapitole 2. sú definované základné pojmy a princípy, ktoré sú neskôr v texte používané a je na ne odkazované. Kapitola 3 navrhuje klienta, v kapitole 4 je tento návrh impelementovaný. Kapitola 5 popisuje používanie tohto kódu. Text je ukončený zhrnutím v kapitole 6.
 \section{Dôležité pojmy}
-V tejto časti budú vysvetlené základné pojmy, ktoré sa tohoto textu týkajú. Jedná sa hlavne o pojem IMAP a pojmy, ktoré sú s ním spojené. 
+V tejto časti sú vysvetlené základné pojmy, ktoré sa tohoto dokumentu a projektu týkajú. Jedná sa hlavne o pojem IMAP a pojmy, ktoré sú s ním spojené. 
 \subsection{IMAP}
-Imap je internetový protokol pre vzdialený prístup k e-mailovej schránke. Jedná sa o skratku z anglického \textit{Internet Message Access Protocol}. Tento protokol vyžaduje on-line k e-mailovej schránke a umožnuje pokročilé možnosti správy schránky.
+Imap je internetový protokol pre vzdialený prístup k e-mailovej schránke. Jedná sa o skratku z anglického \textit{Internet Message Access Protocol}. Tento protokol vyžaduje on-line prístup k e-mailovej schránke a umožnuje pokročilé možnosti správy schránky.
 \subsection{IMAP vs. POP3}
 IMAP vyžaduje on-line prístup k schránke, zatiaľ čo POP3 nepotrebuje neustále pripojenie ku schránke. Oba protokoly sťahujú správy, hlavný rozdiel je avšak v tom, že IMAP správy skopíruje do počítača ale správy ostávaju aj na servery. POP3 správy stiahne do počítača ale zároveň ich odstráni zo serveru.\\
 IMAP narozdiel do POP3 dokáže pracovať s priečinkami. Od výberu priečinku, po presuv správ medzi pričinkami. IMAP rovnako umožnuje mazať, presúvať, označovať a inak editovať správy.\\
@@ -54,12 +54,12 @@ V súčastnej dobre sa používa IMAP verzie 4, označovaný aj ako IMAP4. Tento
 \section{Návrh programu}
 Táto sekcia sa venuje návrhu IMAP klienta. Sú popísané 4 postupy, ktoré si vyžadovali väčšiu pozornosť, či už pre ich zložitosť alebo významnú úlohu pri riešení projektu.
 \subsection{Spracovanie argumentov}
-Ihneď po spustení programu sa testujú argumenty na prítomnosť či neprítomnosť možných prepínačov. Jedná sa o pomerne zložitú činnosť. Na jej zjednodušenie využívam moderné prvky jazyka C++, iterátory.\\ Na zistenie prítomnosti argumentu bola vytvorená metóda \texttt{getCmdOption}, ktorá sa pokúsi vyhľadať argument. V prípade, že tento hľadaný argument požaduje aj hodnotu, testuje sa daľšia položka v liste argumentov.\\
-Keď už dokážeme zistiť, či bol argument zadaný a jeho prípadnú hodnotu, je už len potrebné skúsiť získať všetky parametre a v prípade nezadania sa nastavuje implicitná hodnota.
+Ihneď po spustení programu sa testujú argumenty na prítomnosť či neprítomnosť možných prepínačov. Jedná sa o pomerne zložitú činnosť. Na jej zjednodušenie môžu byť využité moderné prvky jazyka C++, iterátory.\\ Na zistenie prítomnosti argumentu je vhodné vytvoriť metódu, ktorá sa pokúsi vyhľadať argument. V prípade, že tento hľadaný argument požaduje aj hodnotu, testuje sa daľšia položka v liste argumentov.\\
+Keď už je možné zistiť, či bol argument zadaný a jeho prípadnú hodnotu, je už len potrebné skúsiť získať všetky parametre a v prípade nezadania nastaviť implicitnú hodnotu alebo sa ohlásiť chybu ak sa jedná o povinný parameter.
 \subsection{Pripojenie sa na server}
-Pre naviazanie komunikácie so serverom je najskôr preložiť doménové meno na IP adresu. Na toto je možné použiť napríklad \texttt{gethostbyname} či \texttt{getaddrinfo}. Následne môžme vytvoriť naväzované spojenie so serverom a to v dvoch krokoch. Najskôr vytvoríme socket a následne sa pokúsime naviazať cez tento socket na server.\\
-Ak potrebujeme komunikovať cez TLS, je najjednoduchšie postupovať s využítím knižnice \texttt{openssl}. Najskôr načítame certifikát, za pomoci ktorého budeme overovať komunikáciu. Následne môže byť využitá metóda \texttt{BIO\_new\_ssl\_connect}, ktorá dokáže vytvoriť obdobu socketu. Potom metóda \texttt{BIO\_set\_conn\_hostname} sa pokúsi pripojiť na server a nakoniec za pomoci volania \texttt{BIO\_do\_connect} overíme pripojenie a vykonáme handshake.
-\subsection{Komnikácia so serverom}
+Pre naviazanie komunikácie so serverom je najskôr potrebné preložiť doménové meno na IP adresu. Na toto je možné použiť napríklad \texttt{gethostbyname} či \texttt{getaddrinfo}. Následne môžme vytvoriť naväzované spojenie so serverom a to v dvoch krokoch. Najskôr vytvoríme socket a následne sa pokúsime naviazať cez tento socket na server.\\
+Ak je potrebná komunikácia cez TLS, je najjednoduchšie postupovať s využítím knižnice \texttt{openssl}. Najskôr sa načíta certifikát, za pomoci ktorého sa bude overovať komunikáciu. Následne môže byť využitá metóda \texttt{BIO\_new\_ssl\_connect}, ktorá dokáže vytvoriť obdobu socketu. Potom metóda \texttt{BIO\_set\_conn\_hostname} sa pokúsi pripojiť na server a nakoniec za pomoci volania \texttt{BIO\_do\_connect} je overené pripojenie a vykonaný handshake.
+\subsection{Komunikácia so serverom}
 Komunikácia so serverom prebieha na princípe správa-odpoveď. Klient posiela správu za správou s požiadavkou a príjma odpoveďe od serveru. Popis správy posielanej klientom je v sekcii 3.3.1 a správy prijatej od serveru v 3.3.2.
 
 \subsubsection{Poslanie požiadavku}
@@ -69,21 +69,21 @@ Nasleduje príkaz za ktorým môžu nasledovať prípadné argumenty. Konkrétne
 Príklad: A123 LOGIN meno heslo
 
 \subsubsection{Príjem odpovede}
-Odpoveď na požiadavku má taktiež unstanovený tvar definovaný  RFC 3501.\\
-Najskôr server posiela dáta, o ktoré sme žiadali. Správu ukončí tagom požiadavky, na ktorú odpovedá. Nasleduje \texttt{OK} ak všetko prebehlo v poriadku, \texttt{BAD} alebo \texttt{NO} ak sa vyskytla chyba. Za týtmo označením sa zopakuje ešte príkaz, na ktorý sa odpovedá a slovo \texttt{completed}.\\
+Odpoveď na požiadavku má taktiež ustanovený tvar definovaný v RFC 3501.\\
+Najskôr server posiela dáta, o ktoré bolo požiadané. Správu ukončí tagom požiadavky, na ktorú odpovedá. Nasleduje \texttt{OK} ak všetko prebehlo v poriadku, \texttt{BAD} alebo \texttt{NO} ak sa vyskytla chyba. Za týtmo označením sa zopakuje ešte príkaz, na ktorý sa odpovedá a slovo \texttt{completed}.\\
 Príklad: A123 OK LOGIN completed
 
 \subsection{Ukladanie správ}
-Za pomoci FETCH požiadavky server posiela správy. Tieto správy je potrebné uložiť do súborov. Každá správa jeden súbor samostatne. Je preto potrebné vytvárať unikátne názvy súborov. Ako vhodný kandidát sa črtá kombinácia \texttt{užívateľ@mail\_mailbox\_unikátny\_idetifikátor\_správy}. Jedná sa o pomerne zložitý a dlhý názov, preto by bolo možné vypočítať hash tohto názvu. Takýto prístup by ale znamenal veľmi obtiažne vyhľadávanie správ užívateľom.
+Za pomoci FETCH požiadavky server posiela správy. Tieto správy je potrebné uložiť do súborov. Každá správa do jedného súboru. Je preto potrebné vytvárať unikátne názvy súborov. Ako vhodný kandidát sa črtá kombinácia \texttt{užívateľ@mail\_mailbox\_unikátny\_idetifikátor\_správy}. Jedná sa o pomerne zložitý a dlhý názov, preto by bolo možné vypočítať hash tohto názvu. Takýto prístup by ale znamenal veľmi obtiažne vyhľadávanie správ užívateľom.
 
 \section{Implemetnácia}
-Ako implemetnačný jazyk bolo zvolené C++. Oproti C bolo vybrané vďaka podpore reťazcov a objektovému programovaniu, čo umožnovalo krajší návrh a jednoduhšiu implementáciu.\\
+Ako implemetnačný jazyk bolo zvolené C++. Oproti C bolo vybrané vďaka podpore reťazcov a objektovému programovaniu, čo umožnovalo krajší návrh a jednoduchšiu implementáciu.\\
 Ako základ bola vytvorená knižnica \texttt{imap.hh}, ktorej implementácia je v súbore \texttt{imap.cc}. V tejto knižnici boli implementované všetky základné algoritmy, ktoré v tomto projekte boli potrebné.\\
 Pre lahšie spracovanie chýb, ktoré sa mohli vyskytnúť, knižnica podporuje interný systém spracúvania chýb. Preto všetky funkcie vracajú bool, teda True alebo False, podľa toho, či vznikla za ich behu chyba. Následne je možné s funkciou \texttt{get\_error()} získať správu, ktorá daný error lepšie popisuje.\\
 Nasleduje výpis metód implementovaných v knižnici. Pri metódach, ktoré posielajú požiadavky serveru, je aj napísaný konkretný príkaz.\\
 \begin{itemize}
 \item\texttt{connect\_to\_server(host, port)} - Slúži na pripojenie k serveru. Vytvára socket a pripája sa za pomoci \texttt{connect} k serveru.\\
-\item\texttt{connect\_to\_server\_secure(host, port)} - Obdoba \texttt{connect\_to\_server} ale pre zabezpečené spojenie. Využíva \texttt{openssl}.\\
+\item\texttt{connect\_to\_server\_secure(host, port, file, dir)} - Obdoba \texttt{connect\_to\_server} ale pre zabezpečené spojenie. Využíva \texttt{openssl}.\\
 \item\texttt{login(name, password)} - Prihlásenie sa ako užívateľ. Príkaz správy je \texttt{LOGIN name password}.\\
 \item\texttt{logout()} - Odhlásenie sa. Príkaz správy je {LOGOUT}.\\
 \item\texttt{select(mailbox)} - Výber schránky. Príkaz správy je \texttt{SELECT mailbox}\\
@@ -96,7 +96,7 @@ Nasleduje výpis metód implementovaných v knižnici. Pri metódach, ktoré pos
 Nájdi posledný riadok správy;\\
 Ak posledný riadok začína rovnakým písmenom ako identifikátor správy:\\
 Ak posledný riadok začína identifikátorom správy, označíme koniec správy\\}
-\item\texttt{start\_tls()} - Uzatvára TLS so serverom.\\
+\item\texttt{start\_tls()} - Inicializuje TLS so serverom.\\
 \item\texttt{stop\_tls()} - Ukončuje TLS so serverom.\\
 \end{itemize}
 
@@ -127,12 +127,17 @@ kde \textit{meno} a \textit{heslo} sa nahradí konkrétnimi hodnotami.
 
 \end{itemize}
 \section{Záver}
-CHYBA, ROZISRENIE (DEKODOVANIE)
+CHYBA, ROZISRENIE (DEKODOVANIE)\\
 \section{Metriky kódu}
+Počet súborov:      4\\
+Počet riadkov kódu: 582\\
+Veľkosť statických dát: 15Kb\\
+Veľkosť spustiteľného súboru:  574Kb\\
+
+\section{Referencie}
 Zadanie: https://wis.fit.vutbr.cz/FIT/st/course-sl.php.cs?id=615028\&item=59640\&cpa=1\\
 RFC 5301: https://tools.ietf.org/html/rfc3501\\
 Použitie openssl: http://www.ibm.com/developerworks/library/l-openssl/\\
 Opora k C++: https://www.fit.vutbr.cz/study/courses/ICP/public/Prednasky/ICP.pdf\\
-\section{Referencie}
 
 \end{document}
