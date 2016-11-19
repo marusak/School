@@ -102,6 +102,7 @@ bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std
     ctx = SSL_CTX_new(SSLv23_client_method());
     if (!ctx)
         error ("CTX failed", 5);
+    SSL_CTX_set_default_verify_paths(ctx);
     SSL *ssl;
     //Load certificate
     if (! SSL_CTX_load_verify_locations(ctx, (file.empty() ? NULL: file.c_str()), (dir.empty() ? NULL : dir.c_str())))
@@ -117,9 +118,14 @@ bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std
     if (BIO_do_connect(outbio) <= 0)
         error(ERR_reason_error_string(ERR_get_error()), 5);
 
+
+    if (SSL_get_verify_result(ssl) != X509_V_OK)
+        error("Certificate could not be verified", 8);
+
     connection_sock_s = outbio;
     return error_happened();
 }
+
 
 /*Login to the server*/
 bool IMAP::login(std::string login, std::string password){
