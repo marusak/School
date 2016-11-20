@@ -105,7 +105,7 @@ Ak posledný riadok začína identifikátorom správy, označíme koniec správy
 
 
 \section{Použitie aplikácie}
-Aplikáciu je potrebné preložiť príkazom \texttt{make}. Následne sa vytvorí súbor \texttt{imapcl}. Tento súbor môže byť spustení.\\
+Aplikáciu je potrebné preložiť príkazom \texttt{make}. Vyžaduje sa g++ vo verzi minimálne 4.9 a vyššie. Následne sa vytvorí súbor \texttt{imapcl}. Tento súbor môže byť spustení.\\
 Použitie: \texttt{imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth\_file [-b MAILBOX] -o out\_dir [--list] [--help]}\\
 
 Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostupné na https://wis.fit.vutbr.cz/FIT/st/course-sl.php.cs?id=615028\&item=59640\&cpa=1}:\\
@@ -148,7 +148,7 @@ public\\
 
 
 \section{Záver}
-Implementovaný klient pracuje spoľahlivo. Testovaný bol na troch serveroch (eva.fit.vutbr.cz, seznam.cz, gmail.com). Klient sťahuje správy podľa zadania a ukladá ich v navrhnutom formáte, ktorý je popísaný v sekcii 3.4.1.
+Implementovaný klient pracuje spoľahlivo. Jeho preklad bol testovaný na Linux Fedora, Linux Ubuntu (virtuálny stroj, avšak je potrebné updatovať gcc aspoň na verziu 4.9), Linux CentOS (server Merlin - referenčný preklad). Testovaný bol na Linux Fedora a na servery Merlin. Testy overovali funkčnosť sťahovania z troch serverov (eva.fit.vutbr.cz, seznam.cz, gmail.com). Klient sťahuje správy podľa zadania a ukladá ich v navrhnutom formáte, ktorý je popísaný v sekcii 3.4.1.
 \section{Metriky kódu}
 Počet súborov:      4\\
 Počet riadkov kódu: 582\\

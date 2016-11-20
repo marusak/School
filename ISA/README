@@ -18,6 +18,7 @@ Zoznam súborov:
     imapcl.cc   - samotný klient
 
 Preklad:
+    Vyžaduje sa g++ vo verzii 4.9 a vyššie.
     $make       - prelož projekt
     $make clean - vymaž preložený projekt
     $make tar   - vytvor .tar archív
