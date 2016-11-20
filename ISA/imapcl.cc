@@ -60,6 +60,36 @@ char *getCmdOption(char ** begin, char ** end, const std::string &option, bool v
 }
 
 /*
+ * Test if item in array.
+ * Inspired by
+ * http://stackoverflow.com/questions/20303821/how-to-check-if-string-is-in-array-of-strings
+ */
+bool in_array(const std::string &value, const std::vector<std::string> &array){
+    return std::find(array.begin(), array.end(), value) != array.end();
+}
+
+
+/*
+ * Find first free parameter and consider it as server
+ */
+std::string getServer(std::vector<std::string> args){
+    std::vector<std::string> alone {"-n", "-h", "--list", "-T", "--help"};
+    std::vector<std::string> with_p {"-p", "-c", "-C", "-a", "-b", "-o"};
+    while (!args.empty()){
+        if (in_array(args.front(), alone)){
+            args.erase(args.begin());
+        }
+        else if (in_array(args.front(), with_p)){
+            args.erase(args.begin(), args.begin() + 2);
+        }
+        else
+            return args.front();
+    }
+    return "";
+
+}
+
+/*
  * Print help and exit.
  */
 void help(){
@@ -94,7 +124,10 @@ struct config createConfig(int argc, char* argv[]){
         help();
     }
 
-    conf.server = argv[1];
+    std::vector<std::string> args(argv +1 , argv + argc);
+    conf.server = getServer(args);
+    if (conf.server.empty())
+        error("Host was not specified.", 1);
 
     //parse imaps
     if (getCmdOption(argv, argv + argc, "-T", false)){
