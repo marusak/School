@@ -106,7 +106,7 @@ Ak posledný riadok začína identifikátorom správy, označíme koniec správy
 
 \section{Použitie aplikácie}
 Aplikáciu je potrebné preložiť príkazom \texttt{make}. Následne sa vytvorí súbor \texttt{imapcl}. Tento súbor môže byť spustení.\\
-Použitie: \texttt{imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth\_file [-b MAILBOX] -o out\_dir [--list]}\\
+Použitie: \texttt{imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth\_file [-b MAILBOX] -o out\_dir [--list] [--help]}\\
 
 Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostupné na https://wis.fit.vutbr.cz/FIT/st/course-sl.php.cs?id=615028\&item=59640\&cpa=1}:\\
 
@@ -123,6 +123,7 @@ Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostup
 \item    Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté správy.
 \item   Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
     neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
+\item   Parameter --help vypíše nápovedu a skončí beh klienta. Všetky ostatné argumenty sú ignorované.
 
 \subsection{Autentifikačný súbor}
 Tento súbor obsahuje meno a heslo k určitej schánke. Obsahuje práve dva riadky a to:\\

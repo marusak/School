@@ -46,6 +46,8 @@ Spustenie:
         správy.
     Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
     neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
+    Parameter --help vypíše nápovedu a skončí beh klienta. Všetky ostatné argumenty sú
+    ignorované.
 
 Výstup:
     1) Na štandarný výstup sa vypíše počet (N) stiahnutých správ .
