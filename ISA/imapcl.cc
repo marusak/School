@@ -97,9 +97,8 @@ void help(){
     std::cout<<std::endl;
     std::cout<<"Usage:"<<std::endl;
     std::cout<<"     imapcl --help   -> show this help and exit\n";
-    std::cout<<"     imapcl --list   -> show all mailboxes in hierarchy and exit\n";
     std::cout<<"     imapcl  server [-p port] [-T [-c certfile] [-C certaddr]]";
-    std::cout<<"[-n] [-h] -a auth_file [-b MAILBOX] -o out_dir\n";
+    std::cout<<"[-n] [-h] -a auth_file [-b MAILBOX] -o out_dir [--list]\n";
     exit(0);
 }
 
