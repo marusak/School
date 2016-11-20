@@ -20,6 +20,7 @@ class IMAP
         std::string select(std::string mailbox);
         std::string fetch(std::string ids, std::string type);
         std::string search(std::string args);
+        std::string list(std::string parent = "%", std::string del = "");
     private:
         BIO *connection_sock_s;
         SSL_CTX * ctx;

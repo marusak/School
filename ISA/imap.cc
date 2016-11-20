@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <regex>
 
 #include <string.h>
 #include <stdlib.h>
@@ -58,7 +59,6 @@ IMAP::IMAP(){
  */
 bool IMAP::connect_to_server(std::string host, int port){
     secure = false;
-
     hostent *H = gethostbyname(host.c_str());
     if (!H)
         error("Can not get host by name", 2);
@@ -73,13 +73,29 @@ bool IMAP::connect_to_server(std::string host, int port){
     server_sock.sin_family = AF_INET;
     server_sock.sin_port = htons(port);
     memcpy(&(server_sock.sin_addr), H->h_addr, H->h_length);
-
     //Connect
     if (connect(sock,( sockaddr *)&server_sock, sizeof(server_sock)) == -1)
         error("Cannot connect to server", 4);
 
     connection_sock = sock;
     return error_happened();
+    /*
+    OpenSSL_add_all_algorithms();
+    ERR_load_BIO_strings();
+    SSL_load_error_strings();
+
+    BIO *bio;
+    bio = BIO_new_connect((host+":"+std::to_string(port)).c_str());
+    if (bio == NULL)
+        error("Could not connect to server", 8);
+    if (BIO_do_connect(bio) <= 0)
+        error("Could not connect to server", 8);
+
+    secure = true;
+    connection_sock_s = bio;
+    return error_happened();
+    */
+
 }
 
 /*
@@ -299,4 +315,43 @@ std::string IMAP::search(std::string args){
     std::string answer;
     answer = communicate("SEARCH " + args);
     return answer;
+}
+
+std::string get_mailbox_name(const std::string& msg, std::regex r){
+    std::smatch match;
+    if (std::regex_search(msg.begin(), msg.end(), match, r))
+        return match[1];
+    else{
+        return "";
+        }
+}
+
+/*
+ * List all mailboxes.
+ */
+std::string IMAP::list(std::string parent, std::string del){
+    clear_error();
+    std::string all;
+    std::string new_mailbox;
+    std::regex rhc("^.*HasChildren.*?\\\".*?\\\" \\\"(.*)\\\"\r$");
+    std::regex ra("^.*?\\\".*?\\\" \\\"(.*)\\\"\r$");
+    std::string answer;
+    answer = communicate("LIST \"\" " + parent );
+    answer += "\r\n";
+    std::istringstream iss(answer);
+    for (std::string line; std::getline(iss, line); )
+    {
+        new_mailbox = get_mailbox_name(line, rhc);
+        if (!new_mailbox.empty()){
+            all += del+new_mailbox+"\n";
+            all += list(new_mailbox+"/%", del+"    ");
+        }
+        else{
+            new_mailbox = get_mailbox_name(line, ra);
+            if (!new_mailbox.empty()){
+                all += del+new_mailbox+"\n";
+            }
+        }
+    }
+    return all;
 }

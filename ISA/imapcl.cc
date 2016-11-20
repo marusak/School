@@ -33,6 +33,7 @@ struct config{
     std::string mailbox;
     std::string out_dir;
     bool help;
+    bool list;
 };
 
 
@@ -66,6 +67,7 @@ void help(){
     std::cout<<std::endl;
     std::cout<<"Usage:"<<std::endl;
     std::cout<<"     imapcl --help   -> show this help and exit\n";
+    std::cout<<"     imapcl --list   -> show all mailboxes in hierarchy and exit\n";
     std::cout<<"     imapcl  server [-p port] [-T [-c certfile] [-C certaddr]]";
     std::cout<<"[-n] [-h] -a auth_file [-b MAILBOX] -o out_dir\n";
     exit(0);
@@ -138,6 +140,12 @@ struct config createConfig(int argc, char* argv[]){
     else
         conf.h = false;
 
+    //List option
+    if (getCmdOption(argv, argv + argc, "--list", false))
+        conf.list = true;
+    else
+        conf.list = false;
+
     //Authentication file
     if ((arg = getCmdOption(argv, argv + argc, "-a", true)))
         conf.auth_file = arg;
@@ -155,7 +163,7 @@ struct config createConfig(int argc, char* argv[]){
         conf.out_dir = arg;
         conf.out_dir += '/';
     }
-    else
+    else if (!conf.list)
         error("Output directory was not specified",4);
 
     return conf;
@@ -232,6 +240,11 @@ int main(int argc, char* argv[]){
 
     if (con.login(login, passwd))
         error("Could not login to the server", 2);
+
+    if (config.list){
+        std::cout<<con.list();
+        exit(0);
+    }
 
     //Select mailbox
     std::string mailbox_info = con.select(config.mailbox);

@@ -6,7 +6,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage[slovak]{babel} % jazyk dokumentu
-
+\newcommand\tab[1][1cm]{\hspace*{#1}}
 
 \begin{document}
 \begin{titlepage}
@@ -106,7 +106,7 @@ Ak posledný riadok začína identifikátorom správy, označíme koniec správy
 
 \section{Použitie aplikácie}
 Aplikáciu je potrebné preložiť príkazom \texttt{make}. Následne sa vytvorí súbor \texttt{imapcl}. Tento súbor môže byť spustení.\\
-Použitie: \texttt{imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth\_file [-b MAILBOX] -o out\_dir}\\
+Použitie: \texttt{imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth\_file [-b MAILBOX] -o out\_dir [--list]}\\
 
 Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostupné na https://wis.fit.vutbr.cz/FIT/st/course-sl.php.cs?id=615028\&item=59640\&cpa=1}:\\
 
@@ -121,6 +121,8 @@ Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostup
 \item    Parameter -a auth\_file zadáva cestu k autentifikačnému súbor. Jeho štruktúra je zobrazená nižšie.
 \item    Parameter -b špecifikuje názov schránky s ktorou sa bude pracovať. Implicitná hodnota je INBOX.
 \item    Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté správy.
+\item   Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
+    neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
 
 \subsection{Autentifikačný súbor}
 Tento súbor obsahuje meno a heslo k určitej schánke. Obsahuje práve dva riadky a to:\\
@@ -129,6 +131,21 @@ password = heslo}\\
 kde \textit{meno} a \textit{heslo} sa nahradí konkrétnimi hodnotami.
 
 \end{itemize}
+\subsection{Rozšírenia}
+Pre klienta bola implementovaná voľba --list, ktorá vypíše hierarchickú štruktúru všetkých dostupných schránok. Pri tejto voľbe sa sťahovanie neuskutoční, preto povinný parameter -o nemusí byť zadaný.\\
+Príklad použitia:\\
+\$\texttt{imapcl eva.fit.vutbr.cz -a auth\_file -T --list}\\
+Výstup:\\
+Sent\\
+Drafts\\
+Trash\\
+INBOX\\
+public\\
+    \tab public/studinfo\\
+    \tab public/zahranicni\\
+    \tab public/nabidky\\
+
+
 \section{Záver}
 Implementovaný klient pracuje spoľahlivo. Testovaný bol na troch serveroch (eva.fit.vutbr.cz, seznam.cz, gmail.com). Klient sťahuje správy podľa zadania a ukladá ich v navrhnutom formáte, ktorý je popísaný v sekcii 3.4.1.
 \section{Metriky kódu}

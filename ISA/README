@@ -24,7 +24,8 @@ Preklad:
 
 
 Spustenie:
-    $imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth_file [-b MAILBOX] -o out_dir
+    $imapcl server [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth_file [-b MAILBOX] -o
+    out_dir [--list]
     Poradie argumentov je ľubovoľné. Popis argumentov:
 
     Povinne je uvedený názov serveru (IP adresa, alebo doménové meno) požadovaného zdroja.
@@ -43,7 +44,25 @@ Spustenie:
         je INBOX.
     Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté
         správy.
+    Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
+    neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
 
 Výstup:
     1) Na štandarný výstup sa vypíše počet (N) stiahnutých správ .
     2) V priečinku zadanom pri spúšaný sa vytvorý N nových súborov.
+
+Rozšírenie:
+Pre klienta bola implementovaná voľba --list, ktorá vypíše hierarchickú štruktúru všetkých
+dostupných schránok. Pri tejto voľbe sa sťahovanie neuskutoční, preto povinný parameter -o nemusí
+byť zadaný.
+Príklad použitia:
+imapcl eva.fit.vutbr.cz -a auth_file -T --list}
+Výstup:
+Sent
+Drafts
+Trash
+INBOX
+public
+    public/studinfo
+    public/zahranicni
+    public/nabidky
