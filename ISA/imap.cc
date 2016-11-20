@@ -135,8 +135,8 @@ bool IMAP::connect_to_server_s(std::string host, int port, std::string file, std
         error(ERR_reason_error_string(ERR_get_error()), 5);
 
 
-    if (SSL_get_verify_result(ssl) != X509_V_OK)
-        error("Certificate could not be verified", 8);
+    //if (SSL_get_verify_result(ssl) != X509_V_OK)
+    //    error("Certificate could not be verified", 8);
 
     connection_sock_s = outbio;
     return error_happened();
