@@ -304,7 +304,7 @@ int main(int argc, char* argv[]){
         fetch_ans = fetch_ans.substr(top);
         out_msg.open(file_name+token);
         if (! out_msg.is_open())
-            error("Could not create output file", 11);
+            error("Directory does not exist or is not writable", 11);
         out_msg<<body;
         out_msg.close();
         count++;

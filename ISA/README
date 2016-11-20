@@ -43,7 +43,7 @@ Spustenie:
     Parameter -b špecifikuje názov schránky s ktorou sa bude pracovať. Implicitná hodnota
         je INBOX.
     Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté
-        správy.
+        správy. Ak adresár neexistuje, nebude umožnené sťahovať správy.
     Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
     neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
     Parameter --help vypíše nápovedu a skončí beh klienta. Všetky ostatné argumenty sú

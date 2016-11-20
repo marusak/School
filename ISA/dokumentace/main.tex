@@ -120,7 +120,7 @@ Poradie argumentov je ľubovoľné. Popis argumentov\footnote{Zo zadania. Dostup
 \item    Pri použití parametru -h se sťahujú iba hlavičky správ.
 \item    Parameter -a auth\_file zadáva cestu k autentifikačnému súbor. Jeho štruktúra je zobrazená nižšie.
 \item    Parameter -b špecifikuje názov schránky s ktorou sa bude pracovať. Implicitná hodnota je INBOX.
-\item    Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté správy.
+\item    Povinný parameter -o špecifikuje výstupný adresár, do ktorého sa uložia stiahnuté správy. Ak adresár neexistuje alebo nie je do neho možné zapisovať, nebude umožnené sťahovať správy.
 \item   Parameter --list vypíše hierarchickú štruktúru všetkých schránok a ukončí program. Sťahovanie sa
     neuskutoční. Vyžaduje server, -a a prípadne -p, -T (-c, -C).
 \item   Parameter --help vypíše nápovedu a skončí beh klienta. Všetky ostatné argumenty sú ignorované.
