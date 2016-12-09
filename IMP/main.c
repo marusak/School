@@ -119,6 +119,14 @@ void debug_stops(){
 	term_send_crlf();
 }
 
+int waiting_at_stop(char stop){
+	for (i = 0; i < 4; i++){
+		if (stops[i] == stop)
+			return 1;
+	}
+	return 0;
+}
+
 
 
 /*******************************************************************************
@@ -265,6 +273,18 @@ void fpga_interrupt_handler(unsigned char bits)
     keyboard_handle_interrupt(); 
 }
 
+void start_moving(){
+	if (c.floor+48 < stops[0]){
+		c.state = UP;
+		changed = 1;
+	}
+	else if (c.floor+48 > stops[0]){
+		c.state = DOWN;
+		changed = 1;
+	}
+	else
+		remove_stop(stops[0]);
+}
 
 
 /*******************************************************************************
@@ -272,6 +292,7 @@ void fpga_interrupt_handler(unsigned char bits)
 *******************************************************************************/
 int main(void)
 {
+  unsigned cnt = 0;
   c.state = STAY;
   c.floor = ONE;
   c.s_m_1 = 0;
@@ -285,8 +306,40 @@ int main(void)
   while (1)
   {
     delay_ms(10);
+    cnt++;
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
+    if (c.state == STAY && stops[0] != ' '){
+	start_moving();
+	cnt = 0;
+    }
+    
+    if (cnt > 500 && (c.state == UP || c.state == DOWN)){
+	if (c.state == UP)
+		c.floor++;
+	else
+		c.floor--;
+	if (waiting_at_stop((char *)(c.floor+48))){
+		c.state = STAY;
+		remove_stop((char *)(c.floor+48));
+		switch (c.floor){
+			case 0:
+				c.s_m_1 = 0;
+				break;
+			case 1:
+				c.s_1 = 0;
+				break;
+			case 2:
+				c.s_2 = 0;
+				break;
+			case 3:
+				c.s_3 = 0;
+				break;
+		}
+	}
+	cnt = 0;
+	changed = 1;
+    }
     if (changed){
 	    debug_stops();
 	    print_state();
