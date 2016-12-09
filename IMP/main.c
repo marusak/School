@@ -58,11 +58,6 @@
 #define	TWO	2
 #define	THREE	3
 
-#define	s_m_ONE	1
-#define	s_ONE	2
-#define	s_TWO	4
-#define	s_THREE	8
-
 
 int changed = 0;
 char *floors[4] = {"-1", "1 ", "2 ", "3 "};
@@ -72,7 +67,10 @@ typedef struct
 {
 	unsigned int state: 2;
 	unsigned int floor: 2;
-	unsigned int stopping: 4;
+	unsigned int s_m_1: 1;
+	unsigned int s_1: 1;
+	unsigned int s_2: 1;
+	unsigned int s_3: 1;
 } control;
 
 control c;
@@ -92,27 +90,37 @@ void keyboard_idle()
 	switch(ch) {
 		case '1':
 		case '2':
-			c.stopping = s_m_ONE;
-			changed = 1;
+			if (!c.s_m_1){
+			    changed = 1;
+			    c.s_m_1 = 1;
+			}
 			break;
 		case '4':
 		case '5':
-			c.stopping = s_ONE;
-			changed = 1;
+			if (!c.s_1){
+			    c.s_1 = 1;
+			    changed = 1;
+			}
 			break;
 		case '7':
 		case '8':
-			c.stopping = s_TWO;
-			changed = 1;
+			if (!c.s_2){
+			    c.s_2 = 1;
+			    changed = 1;
+			}
 			break;
 		case '*':
 		case '0':
-			c.stopping = s_THREE;
-			changed = 1;
+			if (!c.s_3){
+			    c.s_3 = 1;
+			    changed = 1;
+			}
 			break;
 		case 'B':
-			c.state = ERR;
-			changed = 1;
+			if (c.state != ERR){
+			    c.state = ERR;
+			    changed = 1;
+			}
 			break;
 		case 'C':
 			//TODO
@@ -129,13 +137,57 @@ void keyboard_idle()
 
 void print_state(){
    term_send_str_crlf("******************************");
+   term_send_str_crlf("*=========ON==FLOORS=========*");
    term_send_str_crlf("*      |  STATE   |  ACTUAL  *");
    term_send_str("*  -1  |  ");
    term_send_str(states[c.state]);
    term_send_str("    |     ");
    term_send_str(floors[c.floor]);
    term_send_str_crlf("   *");
+   term_send_str("*   1  |  ");
+   term_send_str(states[c.state]);
+   term_send_str("    |     ");
+   term_send_str(floors[c.floor]);
+   term_send_str_crlf("   *");
+   term_send_str("*   2  |  ");
+   term_send_str(states[c.state]);
+   term_send_str("    |     ");
+   term_send_str(floors[c.floor]);
+   term_send_str_crlf("   *");
+   term_send_str("*   3  |  ");
+   term_send_str(states[c.state]);
+   term_send_str("    |     ");
+   term_send_str(floors[c.floor]);
+   term_send_str_crlf("   *");
+   term_send_str_crlf("*========INSIDE=CABIN========*");
+   term_send_str("*   STATE :      ");
+   term_send_str(states[c.state]);
+   term_send_str_crlf("        *");
+   term_send_str("*   ACTUAL :        ");
+   term_send_str(floors[c.floor]);
+   term_send_str_crlf("       *");
+   term_send_str_crlf("* VISITING | -1 | 1 | 2 | 3 |*");
+   term_send_str("*          | ");
+   if (c.s_m_1)
+	   term_send_str(" O | ");
+   else
+	   term_send_str("   | ");
+   if (c.s_1)
+	   term_send_str("O | ");
+   else
+	   term_send_str("  | ");
+   if (c.s_2)
+	   term_send_str("O | ");
+   else
+	   term_send_str("  | ");
+   if (c.s_3){
+	   term_send_str("O |*");
+	   term_send_crlf();
+   }
+   else
+	   term_send_str_crlf("  |*");
    term_send_str_crlf("******************************");
+   term_send_crlf();
 }
 
 
@@ -174,25 +226,18 @@ int main(void)
 {
   c.state = STAY;
   c.floor = ONE;
-  c.stopping = 0;
+  c.s_m_1 = 0;
+  c.s_1 = 0;
+  c.s_2 = 0;
+  c.s_3 = 0;
   unsigned int cnt = 0;
 
   initialize_hardware();
   keyboard_init();
 
-  set_led_d6(1);                       // rozsviceni D6
-  set_led_d5(1);                       // rozsviceni D5
-
   while (1)
   {
     delay_ms(10);
-    cnt++;
-    if (cnt > 50)
-    {
-       cnt = 0;
-       flip_led_d6();                  // negace portu na ktere je LED
-    }
-
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
     if (changed){
