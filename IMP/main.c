@@ -58,10 +58,13 @@
 #define	TWO	2
 #define	THREE	3
 
+int i;
+int j;
 
 int changed = 0;
 char *floors[4] = {"-1", "1 ", "2 ", "3 "};
 char *states[4] = {"STAY", " UP ", "DOWN", " ERR"};
+char stops[4] = {' ', ' ', ' ', ' '};
 
 typedef struct
 {
@@ -77,6 +80,47 @@ control c;
 
 void print_user_help(void){}
 
+void stop_at(char stop){
+	for (i = 0; i < 4; i++){
+		if (stops[i] == stop)
+			break;
+		if (stops[i] == ' '){
+		       stops[i] = stop;
+	       	       break;
+		}
+	}
+}
+
+void squash_stops(){
+	for (i = 0; i < 3; i++){
+		if (stops[i] == ' '){
+			for (j = i; j < 3; j++){
+				stops[j] = stops[j+1];
+				stops[j+1] = ' ';
+			}
+		}
+	}
+}
+
+void remove_stop(char stop){
+	for (i = 0; i < 4; i++){
+		if (stops[i] == stop)
+			break;
+	}
+	stops[i] = ' ';
+	squash_stops();
+}
+
+void debug_stops(){
+	term_send_str("DEBUG stops: ");
+	for (i = 0; i < 4; i++){
+		term_send_char(stops[i]);
+	}
+	term_send_crlf();
+}
+
+
+
 /*******************************************************************************
  * Obsluha klavesnice
 *******************************************************************************/
@@ -91,8 +135,9 @@ void keyboard_idle()
 		case '1':
 		case '2':
 			if (!c.s_m_1){
-			    changed = 1;
 			    c.s_m_1 = 1;
+			    changed = 1;
+			    stop_at('0');
 			}
 			break;
 		case '4':
@@ -100,6 +145,7 @@ void keyboard_idle()
 			if (!c.s_1){
 			    c.s_1 = 1;
 			    changed = 1;
+			    stop_at('1');
 			}
 			break;
 		case '7':
@@ -107,6 +153,7 @@ void keyboard_idle()
 			if (!c.s_2){
 			    c.s_2 = 1;
 			    changed = 1;
+			    stop_at('2');
 			}
 			break;
 		case '*':
@@ -114,6 +161,7 @@ void keyboard_idle()
 			if (!c.s_3){
 			    c.s_3 = 1;
 			    changed = 1;
+			    stop_at('3');
 			}
 			break;
 		case 'B':
@@ -191,8 +239,6 @@ void print_state(){
 }
 
 
-
-
 /*******************************************************************************
  * Inicializace periferii/komponent po naprogramovani FPGA
 *******************************************************************************/
@@ -219,6 +265,8 @@ void fpga_interrupt_handler(unsigned char bits)
     keyboard_handle_interrupt(); 
 }
 
+
+
 /*******************************************************************************
  * Hlavni funkce
 *******************************************************************************/
@@ -230,7 +278,6 @@ int main(void)
   c.s_1 = 0;
   c.s_2 = 0;
   c.s_3 = 0;
-  unsigned int cnt = 0;
 
   initialize_hardware();
   keyboard_init();
@@ -241,6 +288,7 @@ int main(void)
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
     if (changed){
+	    debug_stops();
 	    print_state();
 	    changed = 0;
     }
