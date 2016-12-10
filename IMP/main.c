@@ -27,6 +27,12 @@
 
 int i;
 int j;
+unsigned cnt;
+unsigned fixing;
+unsigned err_cnt;
+unsigned err_way;
+unsigned needed_time;
+unsigned needed_way;
 
 int changed = 0;
 char *floors[4] = {"-1", "1 ", "2 ", "3 "};
@@ -106,6 +112,10 @@ void keyboard_idle()
   {
     if ((ch = keyboard_get_char())!=0)
     {
+	if (c.state == ERR && ch != 'C'){
+		term_send_str_crlf("Vytah opat nechodi...");
+		continue;
+	}
 	switch(ch) {
 		case '1':
 		case '2':
@@ -141,18 +151,33 @@ void keyboard_idle()
 			break;
 		case 'B':
 			if (c.state != ERR){
+			    err_way = c.state;
 			    c.state = ERR;
 			    changed = 1;
+			    err_cnt = cnt;
 			}
 			break;
 		case 'C':
-			//TODO
+			if (c.state != ERR){
+				term_send_str_crlf("Elevator is not broken. Nothing to repare.");
+			}
+			else{
+				fixing = 1;
+				c.s_m_1 = 0;
+				c.s_1 = 0;
+				c.s_2 = 0;
+				c.s_3 = 0;
+				remove_stop('0');
+				remove_stop('1');
+				remove_stop('2');
+				remove_stop('3');
+				cnt = 0;
+			}
 			break;
 		default:
       			term_send_str("Pressed unmapped key ");
       			term_send_char(ch);
       			term_send_crlf();
-
 	}
     }
   }
@@ -253,13 +278,48 @@ void start_moving(){
 		remove_stop(stops[0]);
 }
 
+void fix_elevator(){
+	if (err_cnt && err_way != STAY){
+	    if (err_way == UP && c.floor == 0){
+		needed_time = 500 - err_cnt;
+		needed_way = UP;
+	    }
+	    else if (err_way == UP && c.floor){
+		needed_time = err_cnt;
+		needed_way = DOWN;
+	    }
+	    else if (err_way == DOWN && c.floor == 1){
+		needed_time = err_cnt;
+		needed_way = UP;
+	    }
+	    else if (err_way == DOWN){
+		needed_time = 500 - err_cnt;
+		needed_way = DOWN;
+	    }
+ 	    err_cnt = 0;
+	    fixing = 0;
+	}
+	else if (c.floor != 1){
+	    needed_time = 500;
+	    needed_way = c.floor > 1 ? DOWN : UP;
+	    fixing = 0;
+	}
+	else{
+	    c.state = STAY;
+	    changed = 1;
+	    fixing = 0;
+	    needed_time = 0;
+	}
+	cnt = 0;
+}
 
 /*******************************************************************************
  * Hlavni funkce
 *******************************************************************************/
 int main(void)
 {
-  unsigned cnt = 0;
+  cnt = 0;
+  fixing = 0;
   c.state = STAY;
   c.floor = ONE;
   c.s_m_1 = 0;
@@ -276,19 +336,32 @@ int main(void)
     cnt++;
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
-    if (c.state == STAY && stops[0] != ' '){
+    if (c.state == ERR && fixing){
+	fix_elevator();
+    }
+    if (c.state == ERR && needed_time && cnt >= needed_time){
+	if (needed_way == UP)
+		c.floor++;
+    	else
+		c.floor--;
+	cnt = 0;
+	changed = 1;
+	fix_elevator();
+    }
+
+    else if (c.state == STAY && stops[0] != ' '){
 	start_moving();
 	cnt = 0;
     }
     
-    if (cnt > 500 && (c.state == UP || c.state == DOWN)){
+    else if (cnt > 500 && (c.state == UP || c.state == DOWN)){
 	if (c.state == UP)
 		c.floor++;
 	else
 		c.floor--;
-	if (waiting_at_stop((char *)(c.floor+48))){
+	if (waiting_at_stop((char)(c.floor+48))){
 		c.state = STAY;
-		remove_stop((char *)(c.floor+48));
+		remove_stop((char)(c.floor+48));
 		switch (c.floor){
 			case 0:
 				c.s_m_1 = 0;
