@@ -33,11 +33,16 @@ unsigned err_cnt;
 unsigned err_way;
 unsigned needed_time;
 unsigned needed_way;
+unsigned opening;
+unsigned closing;
+unsigned waiting;
+
 
 int changed = 0;
 char *floors[4] = {"-1", "1 ", "2 ", "3 "};
 char *states[4] = {"STAY", " UP ", "DOWN", " ERR"};
 char stops[4] = {' ', ' ', ' ', ' '};
+char doors[4] = {'C', 'O', 'C', 'C'};
 
 typedef struct
 {
@@ -193,28 +198,36 @@ void keyboard_idle()
 
 void print_state(){
    term_send_str_crlf("******************************");
-   term_send_str_crlf("*=========ON==FLOORS=========*");
-   term_send_str_crlf("*      |  STATE   |  ACTUAL  *");
-   term_send_str("*  -1  |  ");
+   term_send_str_crlf("*==========ON==FLOORS========*");
+   term_send_str_crlf("*    | STATE | CURR | DOOR | *");
+   term_send_str("* -1 | ");
    term_send_str(states[c.state]);
-   term_send_str("    |     ");
+   term_send_str("  |   ");
    term_send_str(floors[c.floor]);
-   term_send_str_crlf("   *");
-   term_send_str("*   1  |  ");
+   term_send_str("  |  ");
+   term_send_char(doors[0]);
+   term_send_str_crlf("  | *");
+   term_send_str("*  1 | ");
    term_send_str(states[c.state]);
-   term_send_str("    |     ");
+   term_send_str("  |   ");
    term_send_str(floors[c.floor]);
-   term_send_str_crlf("   *");
-   term_send_str("*   2  |  ");
+   term_send_str("  |  ");
+   term_send_char(doors[1]);
+   term_send_str_crlf("  | *");
+   term_send_str("*  2 | ");
    term_send_str(states[c.state]);
-   term_send_str("    |     ");
+   term_send_str("  |   ");
    term_send_str(floors[c.floor]);
-   term_send_str_crlf("   *");
-   term_send_str("*   3  |  ");
+   term_send_str("  |  ");
+   term_send_char(doors[2]);
+   term_send_str_crlf("  | *");
+   term_send_str("*  3 | ");
    term_send_str(states[c.state]);
-   term_send_str("    |     ");
+   term_send_str("  |   ");
    term_send_str(floors[c.floor]);
-   term_send_str_crlf("   *");
+   term_send_str("  |  ");
+   term_send_char(doors[3]);
+   term_send_str_crlf("  | *");
    term_send_str_crlf("*========INSIDE=CABIN========*");
    term_send_str("*   STATE :      ");
    term_send_str(states[c.state]);
@@ -334,6 +347,9 @@ int main(void)
   c.s_1 = 0;
   c.s_2 = 0;
   c.s_3 = 0;
+  opening = 0;
+  closing = 0;
+  waiting = 0;
 
   initialize_hardware();
   keyboard_init();
@@ -356,9 +372,39 @@ int main(void)
 	changed = 1;
 	fix_elevator();
     }
+    
+    if (waiting){
+	   if(cnt > 200){
+	      cnt = 0;
+	      waiting = 0;
+	   }
+    }
+    else if (opening){
+	   if(cnt > 100){
+		    cnt = 0;
+		    doors[c.floor] = 'O';
+		    opening = 0;
+		    changed = 1;
+		    waiting = 1;
+	   }
+    }
+
+    else if (closing){
+	    if (cnt > 100){
+		    cnt = 0;
+		    doors[c.floor] = 'C';
+		    closing = 0;
+		    changed = 1;
+	    }
+    }
 
     else if (c.state == STAY && stops[0] != ' '){
-	start_moving();
+	if (doors[c.floor] == 'C'){
+		start_moving();
+	}
+	else{
+		closing = 1;
+	}
 	cnt = 0;
     }
     
@@ -369,6 +415,7 @@ int main(void)
 		c.floor--;
 	if (waiting_at_stop((char)(c.floor+48))){
 		c.state = STAY;
+		opening = 1;
 		remove_stop((char)(c.floor+48));
 		switch (c.floor){
 			case 0:
