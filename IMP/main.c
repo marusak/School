@@ -177,6 +177,7 @@ void keyboard_idle()
 				term_send_str_crlf("Elevator is not broken. Nothing to repare.");
 			}
 			else{
+				closing = 1;
 				fixing = 1;
 				c.s_m_1 = 0;
 				c.s_1 = 0;
@@ -332,6 +333,7 @@ void fix_elevator(){
 	    changed = 1;
 	    fixing = 0;
 	    needed_time = 0;
+	    opening = 1;
 	}
 	cnt = 0;
 }
@@ -362,10 +364,20 @@ int main(void)
     cnt++;
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
-    if (c.state == ERR && fixing){
+    if (closing){
+	    if (cnt > 100){
+		    cnt = 0;
+		    doors[c.floor] = 'C';
+		    closing = 0;
+		    changed = 1;
+	    }
+    }
+
+    else if (c.state == ERR && fixing){
 	fix_elevator();
     }
-    if (c.state == ERR && needed_time && cnt >= needed_time){
+
+    else if (c.state == ERR && needed_time && cnt >= needed_time){
 	if (needed_way == UP)
 		c.floor++;
     	else
@@ -375,7 +387,7 @@ int main(void)
 	fix_elevator();
     }
     
-    if (waiting){
+    else if (waiting){
 	   if(cnt > 200){
 	      cnt = 0;
 	      waiting = 0;
@@ -391,14 +403,6 @@ int main(void)
 	   }
     }
 
-    else if (closing){
-	    if (cnt > 100){
-		    cnt = 0;
-		    doors[c.floor] = 'C';
-		    closing = 0;
-		    changed = 1;
-	    }
-    }
 
     else if (c.state == STAY && stops[0] != ' '){
 	if (doors[c.floor] == 'C'){
