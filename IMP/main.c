@@ -120,6 +120,8 @@ void keyboard_idle()
 		case '1':
 		case '2':
 			if (!c.s_m_1){
+			    if (c.state == STAY && c.floor == 0)
+				    continue;
 			    c.s_m_1 = 1;
 			    changed = 1;
 			    stop_at('0');
@@ -128,6 +130,8 @@ void keyboard_idle()
 		case '4':
 		case '5':
 			if (!c.s_1){
+			    if (c.state == STAY && c.floor == 1)
+				    continue;
 			    c.s_1 = 1;
 			    changed = 1;
 			    stop_at('1');
@@ -136,6 +140,8 @@ void keyboard_idle()
 		case '7':
 		case '8':
 			if (!c.s_2){
+			    if (c.state == STAY && c.floor == 2)
+				    continue;
 			    c.s_2 = 1;
 			    changed = 1;
 			    stop_at('2');
@@ -144,6 +150,8 @@ void keyboard_idle()
 		case '*':
 		case '0':
 			if (!c.s_3){
+			    if (c.state == STAY && c.floor == 3)
+				    continue;
 			    c.s_3 = 1;
 			    changed = 1;
 			    stop_at('3');
