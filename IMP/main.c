@@ -85,6 +85,8 @@ void remove_stop(char stop){
 		if (stops[i] == stop)
 			break;
 	}
+	if (i > 3)
+		return;
 	stops[i] = ' ';
 	squash_stops();
 }
