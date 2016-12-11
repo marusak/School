@@ -127,41 +127,69 @@ void keyboard_idle()
 		case '1':
 		case '2':
 			if (!c.s_m_1){
-			    if (c.state == STAY && c.floor == 0)
+			    if (c.state == STAY && c.floor == 0 && !closing)
 				    continue;
-			    c.s_m_1 = 1;
-			    changed = 1;
-			    stop_at('0');
+			    if (closing){
+				    closing = 0;
+				    opening = 1;
+				    cnt = 100 - cnt;
+			    }
+			    else{
+				    c.s_m_1 = 1;
+				    changed = 1;
+				    stop_at('0');
+			    }
 			}
 			break;
 		case '4':
 		case '5':
 			if (!c.s_1){
-			    if (c.state == STAY && c.floor == 1)
+			    if (c.state == STAY && c.floor == 1 && !closing)
 				    continue;
-			    c.s_1 = 1;
-			    changed = 1;
-			    stop_at('1');
+			    if (closing){
+				    closing = 0;
+				    opening = 1;
+				    cnt = 100 - cnt;
+			    }
+			    else{
+				    c.s_1 = 1;
+				    changed = 1;
+				    stop_at('1');
+			    }
 			}
 			break;
 		case '7':
 		case '8':
 			if (!c.s_2){
-			    if (c.state == STAY && c.floor == 2)
+			    if (c.state == STAY && c.floor == 2 && !closing)
 				    continue;
-			    c.s_2 = 1;
-			    changed = 1;
-			    stop_at('2');
+			    if (closing){
+				    closing = 0;
+				    opening = 1;
+				    cnt = 100 - cnt;
+			    }
+			    else{
+				    c.s_2 = 1;
+				    changed = 1;
+				    stop_at('2');
+			    }
 			}
 			break;
 		case '*':
 		case '0':
 			if (!c.s_3){
-			    if (c.state == STAY && c.floor == 3)
+			    if (c.state == STAY && c.floor == 3 && !closing)
 				    continue;
-			    c.s_3 = 1;
-			    changed = 1;
-			    stop_at('3');
+			    if (closing){
+				    closing = 0;
+				    opening = 1;
+				    cnt = 100 - cnt;
+			    }
+			    else{
+				    c.s_3 = 1;
+				    changed = 1;
+				    stop_at('3');
+				}
 			}
 			break;
 		case 'B':
