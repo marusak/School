@@ -238,7 +238,6 @@ void keyboard_idle()
 
 //Function for printing current state
 void print_state(){
-   term_send_str_crlf("******************************");
    term_send_str_crlf("*==========ON==FLOORS========*");
    term_send_str_crlf("*    | STATE | CURR | DOOR | *");
    term_send_str("* -1 | ");
@@ -297,8 +296,7 @@ void print_state(){
    else{
 	   term_send_str_crlf("  |*");
    }
-   term_send_str_crlf("******************************");
-   term_send_crlf();
+   term_send_str_crlf("*============================*");
 }
 
 
@@ -486,7 +484,6 @@ int main(void)
 	changed = 1;
     }
     if (changed){
-	    debug_stops();
 	    print_state();
 	    changed = 0;
     }
