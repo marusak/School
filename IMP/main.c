@@ -138,7 +138,7 @@ void keyboard_idle()
 			if (!c.s_m_1){
 			    if (c.state == STAY && c.floor == 0 && !closing)
 				    continue;
-			    if (closing){
+			    if (closing && c.floor == 0){
 				    closing = 0;
 				    opening = 1;
 				    cnt = 100 - cnt;
@@ -155,7 +155,7 @@ void keyboard_idle()
 			if (!c.s_1){
 			    if (c.state == STAY && c.floor == 1 && !closing)
 				    continue;
-			    if (closing){
+			    if (closing && c.floor == 1){
 				    closing = 0;
 				    opening = 1;
 				    cnt = 100 - cnt;
@@ -172,7 +172,7 @@ void keyboard_idle()
 			if (!c.s_2){
 			    if (c.state == STAY && c.floor == 2 && !closing)
 				    continue;
-			    if (closing){
+			    if (closing && c.floor == 2){
 				    closing = 0;
 				    opening = 1;
 				    cnt = 100 - cnt;
@@ -189,7 +189,7 @@ void keyboard_idle()
 			if (!c.s_3){
 			    if (c.state == STAY && c.floor == 3 && !closing)
 				    continue;
-			    if (closing){
+			    if (closing && c.floor == 3){
 				    closing = 0;
 				    opening = 1;
 				    cnt = 100 - cnt;
