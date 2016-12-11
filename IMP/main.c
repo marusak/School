@@ -214,7 +214,7 @@ void keyboard_idle()
 				term_send_str_crlf("Elevator is not broken. Nothing to repare.");
 			}
 			else{
-				if (doors[c.floor] == 'O'){
+				if (doors[c.floor] == 'O' && c.floor != 1){
 					closing = 1;
 				}
 				fixing = 1;
@@ -345,17 +345,17 @@ void start_moving(){
 //Begin fixing elevator
 void fix_elevator(){
 	if (err_cnt && err_way != STAY){
-	    if (err_way == UP && c.floor == 0){
+	    if (c.floor == 1){
+	        needed_time = err_cnt;
+		needed_way = ERR;
+	    }
+	    else if (err_way == UP && c.floor == 0){
 		needed_time = 500 - err_cnt;
 		needed_way = UP;
 	    }
 	    else if (err_way == UP && c.floor){
-		needed_time = err_cnt;
+		needed_time = err_cnt + 500;
 		needed_way = DOWN;
-	    }
-	    else if (err_way == DOWN && c.floor == 1){
-		needed_time = err_cnt;
-		needed_way = UP;
 	    }
 	    else if (err_way == DOWN){
 		needed_time = 500 - err_cnt;
@@ -374,7 +374,9 @@ void fix_elevator(){
 	    changed = 1;
 	    fixing = 0;
 	    needed_time = 0;
-	    opening = 1;
+	    if (doors[1] == 'C'){
+	    	opening = 1;
+	    }
 	}
 	cnt = 0;
 }
@@ -424,7 +426,7 @@ int main(void)
     else if (c.state == ERR && needed_time && cnt >= needed_time){
 	if (needed_way == UP)
 		c.floor++;
-    	else
+    	else if (needed_way == DOWN)
 		c.floor--;
 	cnt = 0;
 	changed = 1;
