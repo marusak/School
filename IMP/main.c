@@ -214,7 +214,9 @@ void keyboard_idle()
 				term_send_str_crlf("Elevator is not broken. Nothing to repare.");
 			}
 			else{
-				closing = 1;
+				if (doors[c.floor] == 'O'){
+					closing = 1;
+				}
 				fixing = 1;
 				c.s_m_1 = 0;
 				c.s_1 = 0;
