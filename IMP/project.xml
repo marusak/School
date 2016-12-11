@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project outputprefix="kb">
+
+    <!--  Project description -->
+    <name>Vytah opat nechodi</name>
+    <category>Demo aplikace</category>
+    <author>Matej Marusak</author>
+    <authoremail>xmarus06@stud.fit.vutbr.cz </authoremail>
+    <revision>2015/16</revision>
+    <description>Riadenie vytahu</description>
+
+    <!--  MCU part -->
+    <mcu>
+        <include>mcu/libs/irq/package.xml</include>
+        <include>mcu/libs/keyboard/package.xml</include>
+        <include>mcu/libs/lcd/package.xml</include>
+        <file>main.c</file>
+    </mcu>
+
+    <!-- FPGA part -->
+    <fpga architecture="bare">
+        <include>fpga/ctrls/irq/package.xml</include>
+        <include>fpga/ctrls/keyboard/package.xml</include>
+        <include>fpga/ctrls/lcd/package.xml</include>
+        <file>top_level.vhd</file>
+    </fpga>
+
+</project>
