@@ -7,6 +7,7 @@
  *  Author: Matej Marusak, xmarus06@stud.fit.vutbr.cz
  *
  *  9.12.2016
+ *  95% original (lines 305-329 are from Demo - klavesnice s prerusenim)
  *  Created as school project at VUT FIR Brno
 */
 
