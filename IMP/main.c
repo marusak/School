@@ -15,16 +15,19 @@
 #include <irq/fpga_interrupt.h>
 #include <keyboard/keyboard.h>
 
+// Define states of elevator
 #define STAY	0
 #define UP	1
 #define DOWN	2
 #define	ERR	3
 
+// Define floors
 #define	m_ONE	0
 #define ONE	1
 #define	TWO	2
 #define	THREE	3
 
+// All the controling variables
 int i;
 int j;
 unsigned cnt;
@@ -36,14 +39,8 @@ unsigned needed_way;
 unsigned opening;
 unsigned closing;
 unsigned waiting;
-
-
 int changed = 0;
-char *floors[4] = {"-1", "1 ", "2 ", "3 "};
-char *states[4] = {"STAY", " UP ", "DOWN", " ERR"};
 char stops[4] = {' ', ' ', ' ', ' '};
-char doors[4] = {'C', 'O', 'C', 'C'};
-
 typedef struct
 {
 	unsigned int state: 2;
@@ -54,10 +51,16 @@ typedef struct
 	unsigned int s_3: 1;
 } control;
 
+// Helpul strings for better printing
+char *states[4] = {"STAY", " UP ", "DOWN", " ERR"};
+char *floors[4] = {"-1", "1 ", "2 ", "3 "};
+char doors[4] = {'C', 'O', 'C', 'C'};
+
 control c;
 
 void print_user_help(void){}
 
+//Add next stopping floor
 void stop_at(char stop){
 	for (i = 0; i < 4; i++){
 		if (stops[i] == stop)
@@ -69,6 +72,7 @@ void stop_at(char stop){
 	}
 }
 
+//Squash stops to front of array
 void squash_stops(){
 	for (i = 0; i < 3; i++){
 		if (stops[i] == ' '){
@@ -80,6 +84,7 @@ void squash_stops(){
 	}
 }
 
+//Remove stopping floor
 void remove_stop(char stop){
 	for (i = 0; i < 4; i++){
 		if (stops[i] == stop)
@@ -91,6 +96,7 @@ void remove_stop(char stop){
 	squash_stops();
 }
 
+//Print all stopping floors for debuging purposes
 void debug_stops(){
 	term_send_str("DEBUG stops: ");
 	for (i = 0; i < 4; i++){
@@ -99,6 +105,7 @@ void debug_stops(){
 	term_send_crlf();
 }
 
+// Return true if stop floor has any request on it
 int waiting_at_stop(char stop){
 	for (i = 0; i < 4; i++){
 		if (stops[i] == stop)
@@ -119,6 +126,7 @@ void keyboard_idle()
   {
     if ((ch = keyboard_get_char())!=0)
     {
+	// If elevator if broken and not repair signal - ignore all other options
 	if (c.state == ERR && ch != 'C'){
 		term_send_str_crlf("Vytah opat nechodi...");
 		continue;
@@ -227,6 +235,7 @@ void keyboard_idle()
   }
 }
 
+//Function for printing current state
 void print_state(){
    term_send_str_crlf("******************************");
    term_send_str_crlf("*==========ON==FLOORS========*");
@@ -284,8 +293,9 @@ void print_state(){
 	   term_send_str("O |*");
 	   term_send_crlf();
    }
-   else
+   else{
 	   term_send_str_crlf("  |*");
+   }
    term_send_str_crlf("******************************");
    term_send_crlf();
 }
@@ -317,6 +327,7 @@ void fpga_interrupt_handler(unsigned char bits)
     keyboard_handle_interrupt(); 
 }
 
+// Start movement of cabin
 void start_moving(){
 	if (c.floor+48 < stops[0]){
 		c.state = UP;
@@ -330,6 +341,7 @@ void start_moving(){
 		remove_stop(stops[0]);
 }
 
+//Begin fixing elevator
 void fix_elevator(){
 	if (err_cnt && err_way != STAY){
 	    if (err_way == UP && c.floor == 0){
@@ -371,6 +383,7 @@ void fix_elevator(){
 *******************************************************************************/
 int main(void)
 {
+  // Init all variables after reset
   cnt = 0;
   fixing = 0;
   c.state = STAY;
@@ -388,10 +401,12 @@ int main(void)
 
   while (1)
   {
+    // Do not run too fast
     delay_ms(10);
     cnt++;
     terminal_idle();                   // obsluha terminalu
     keyboard_idle();                   // obsluha klavesnice
+    //This part is described in documentation
     if (closing){
 	    if (cnt > 100){
 		    cnt = 0;
