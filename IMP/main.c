@@ -397,7 +397,7 @@ int main(void)
 
   initialize_hardware();
   keyboard_init();
-
+  print_state();
   while (1)
   {
     // Do not run too fast
