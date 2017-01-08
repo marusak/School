@@ -1,0 +1,190 @@
+#/!/bin/sh
+
+#wedi
+#Riesenie IOS-DU1, 29.3.2015
+#Autor: Matej Marusak, xmarus06, VUT FIT
+#wrapper
+
+#format: cesta//nazov//pocet_otvoreni//datum_vzniku//posledna_uprava
+#        otvoreny subor sa vzdy umiestni navrch
+#        oddelovac je // - lebo / nemoze obsahovat nazov suboru, ale / sa vyskytuje v ceste
+
+###################funkcie######################
+
+
+#vypise vsetky subory ktore existuju (vhodne mu dat grepnuty priecinok)
+
+existing() {
+    while read -r i;
+    do
+        cesta=`echo "$i" | awk -F'//' '{print $1}' `   
+        subor=`echo "$i" | awk -F'//' '{print $2}' `   
+        if [ -f "$cesta"/"$subor" ];then
+            echo "$i"
+        fi
+    done <<< "$1"
+}
+
+
+#ak prepinac -m hlada najcastejsie pouzity v $1
+#ak prepinac -o hlada naposledy otvoreny v $1
+mdir() {
+    cesta=${1%/}
+    if [ "$2" = "-m" ];then
+        lines=`cat "$WEDI_RC" | grep '^'"$cesta"'//'`
+        found_lines=`existing "$lines" | awk -F"//" '{a[$3]=$0};END{asort(a, b, "@ind_num_desc");
+        for (i in b) print b[i]}'`
+
+    elif [ "$2" = "-o" ];then
+        lines=`cat "$WEDI_RC" | grep '^'"$cesta"'//'`
+        found_lines=`existing "$lines"`
+    else
+        chyba 'neplatny prepinac'
+    fi
+    
+    if [ -z "$found_lines" ];then
+        chyba 'v danom priecinku neboli editovane ziadne subory'
+    fi
+
+    cesta=`echo "$found_lines" | head -n1 | awk -F'//' '{print $1}' `   
+    subor=`echo "$found_lines" | head -n1 | awk -F'//' '{print $2}' `   
+    file "$cesta" "$subor"
+}
+
+
+#$1 je prepinac -a alebo -b
+#$2 je cas
+#%3 je adresar
+
+ba() {
+    given=`echo "$2" | grep -x '[0123456789]\{4\}\-[0123456789]\{2\}\-[0123456789]\{2\}'`
+    if [ -z $given ];then
+        chyba 'nespravny format casu'
+    fi
+    cesta=${3%/}
+    if [ "$1" = "-a" ];then
+        files=`cat "$WEDI_RC" | grep '^'"$cesta"'//' | awk -F"//" -v "cas=$given" '{if ($5 >= cas) print }'`
+    elif [ "$1" = "-b" ];then
+        files=`cat "$WEDI_RC" | grep '^'"$cesta"'//' | awk -F"//" -v "cas=$given" '{if ($4 <= cas) print }'`
+    else
+        chyba 'neplatny prepinac'
+    fi
+    existing "$files" | awk -F"//" '{print $2}'
+}
+
+
+#vytlaci zoznam ktory odpoveda adresari v $1
+
+list_dir() {
+    cesta=${1%/}
+    files=`cat "$WEDI_RC" | grep '^'"$cesta"'//'`
+    existing "$files" | awk -F"//" '{print  $2}'
+}
+
+
+#vytlaci chybovu hlasku v $1 a skonci
+
+chyba() {
+    echo "$1" >&2
+    exit 1
+}
+
+
+file() {
+#    echo "$1"
+#    echo "$2"
+    #prvy argument je adresa, druhy subor
+    file=`cat "$WEDI_RC"`
+    NOW=`date +"%Y-%m-%d"`
+    found_line=`cat $WEDI_RC | awk -F"//" -v OFS="//" -v cesta="$1" -v subor="$2" '$1==cesta && $2==subor {print}'`
+    if [ -z "$found_line" ]; then
+        echo "$1"//"$2"//1//"$NOW"//"$NOW" > "$WEDI_RC"
+        echo "$file">>"$WEDI_RC"
+    else 
+        echo "$found_line" | awk -F"//" -v OFS="//" '{$3 +=1; $5 ="'$NOW'";  print }'>"$WEDI_RC"
+        echo "$file" | awk -v line="$found_line" '$0!=line {print}' >>"$WEDI_RC"
+    fi
+    $ED "$1/$2"
+    return $?
+
+}
+
+###################telo##################
+
+
+#kontrola ci je nastavene WEDI_RC na mozny subor - ak neexistuje, vytvorim prazdny
+if [ -z  "$WEDI_RC" ]; then
+    chyba 'Chyba udaj o subore v premennej WEDI_RC'
+elif ! [ -f "$WEDI_RC" ]; then
+    >"$WEDI_RC"
+fi
+
+
+#kontrola ci je nastaveny EDITOR alebo VISUAL - ulozim si do ED, overim ze je to program
+if [ -z "$EDITOR" ];then
+    if [ -z "$VISUAL" ];then
+        chyba 'Nie je nastaveny EDITOR ani VISUAL'
+    else ED="$VISUAL"
+    fi
+else ED="$EDITOR"
+fi
+if ! ( hash "$ED" 2>/dev/null ) ; then
+    chyba 'program v EDITOR nie je program'
+fi
+
+
+#test ci existuje realpath, ak nie, koncim
+realpath . >/dev/null &>/dev/null
+if ! [ $? -eq 0 ]; then
+    chyba 'realpath neexistuje'
+fi
+
+#spracujem prikazovu riadku
+if [ $# -eq 0 ];then
+    mdir `realpath .` -o
+
+elif [ $# -eq 1 ];then
+    if [ -d  "$1" ]; then 
+        mdir `realpath $1` -o
+    elif [ -f "$1" ]; then
+        cesta=`echo "$1" | sed 's/\(^.*\)\/\(.*\)/\1/'`
+        subor=`echo "$1" | sed 's/\(^.*\)\/\(.*\)/\2/'`
+        if [ "$cesta" = "$subor" ];then
+            file `realpath .` "$subor"
+        else
+            file `realpath $cesta` "$subor" 
+        fi
+    elif [ "$1" = "-m" ];then
+        mdir `realpath .` -m
+    elif [ "$1" = "-l" ];then
+        list_dir `realpath .`
+    else 
+        cesta=`echo "$1" | sed 's/\(^.*\)\/\(.*\)/\1/'`
+        if [ -d "$cesta" ]; then
+            subor=`echo "$1" | sed 's/\(^.*\)\/\(.*\)/\2/'`
+            file `realpath $cesta` "$subor" 
+        elif [ "$1" = "$cesta" ];then
+            file `realpath .` "$1"
+        else chyba 'neplatna prikazova riadka'
+        fi
+    fi
+elif [ $# -eq 2 ];then
+    if [ "$1" = "-m" ] && [ -d "$2" ];then
+        mdir `realpath $2` -m
+    elif [ "$1" == "-l" ] && [ -d "$2" ];then
+        list_dir `realpath $2`
+    elif [ "$1" = "-a" ] || [ "$1" = "-b" ];then
+        ba "$1" "$2" `realpath .`
+    else chyba 'neplatna prikazova riadka'
+    fi
+elif [ $# -eq 3 ];then
+    if [ "$1" = "-a" ] || [ "$1" = "-b" ];then
+        if [ -d "$3" ] ;then
+            ba "$1" "$2" `realpath $3`
+        else chyba 'nespravna prikazova riadka'
+        fi
+    else chyba 'nespravna prikazova riadka'
+    fi
+else 
+    chyba 'nespravna prikazova riadka'
+fi
