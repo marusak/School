@@ -1,0 +1,80 @@
+u celá čísla.
+
+Implementační detaily
+
+Každému atomu odpovídá jeden proces.
+Hlavní proces vytváří dva pomocné procesy, každý pro generování procesů atomů stejné kategorie
+    jeden proces generuje procesy pro vodík; každý nový proces je generován po uplynutí náhodné doby
+    z intervalu <0, GH>; vygeneruje 2*N procesů.
+        další proces generuje procesy pro kyslík; každý nový proces je generován po uplynutí náhodné
+        doby z intervalu <0, GO>; vygeneruje N procesů.
+            postupně tedy vznikne hlavní proces, dva pomocné procesy pro generování atomů a 3*N
+            procesů atomů.
+            Každý proces hydrogen i oxygen bude interně identifikován celým číslem I, začínajícím od
+            1. Číselná řada je pro každou kategorii atomů zvlášť.
+            Každý proces atomu vykonává své akce a současně zapisuje informace o akcích do souboru s
+            názvem h2o.out.
+                Přístup k výstupnímu zařízení (zápis informací) musí být výlučný; pokud zapisuje
+                jeden proces a další chce také zapisovat, musí počkat na uvolnění zdroje.
+                    Součástí výstupních informací o akci je pořadové číslo A prováděné akce (viz
+                            popis výstupů). Akce se číslují od jedničky.
+                    Použijte sdílenou paměť pro implementaci čítače akcí a sdílených proměnných
+                    nutných pro synchronizaci.
+                    Použijte semafory pro synchronizaci procesů.
+                    Nepoužívejte aktivní čekání (včetně cyklického časového uspání procesu) pro
+                    účely synchronizace.
+                    Procesy atomů, které již utvořily molekulu, čekají na všechny ostatní procesy;
+                    všechny procesy atomů se ukončí současně.
+                    Hlavní proces čeká na ukončení všech vytvořených procesů. Poté se ukončí s kódem
+                    (exit code) 0.
+                    Budete-li potřebovat generovat unikátní klíč, je vhodné použít funkci ftok.
+                    Další funkce a systémová volání: fork, wait, shmat, semctl, semget, shmget,
+                    sem_open, usleep, ...
+
+                    Chybové stavy
+
+                    Pokud některý ze vstupů nebude odpovídat očekávanému formátu nebo bude mimo
+                    povolený rozsah, program vytiskne 
+                    chybové hlášení na standardní chybový výstup, uvolní všechny dosud alokované
+                    zdroje a ukončí se s kódem (exit code) 1.
+                    Pokud selže systémové volání, program vytiskne chybové hlášení na standardní
+                    chybový výstup, uvolní všechny 
+                    alokované zdroje a ukončí se s kódem (exit code) 2.
+
+                    Popis procesů a jejich výstupů
+                    Poznámka k výstupům:
+
+                    A je pořadové číslo prováděné akce,
+                    NAME je zkratka kategorie příslušného procesu, tj. H nebo O,
+                    I je interní identifikátor procesu v rámci příslušné kategorie,
+                    Při vyhodnocování výstupu budou ignorovány mezery a tabelátory.
+
+                    Proces atomu (oxygen i hydrogen)
+
+    Po spuštění tiskne A: NAME I: started.
+    Ověřuje stav za následujících podmínek:
+        pokud se zrovna tvoří jiná molekula, proces čeká, dokud nebude schopen provést bod 2b
+            pokud se zrovna netvoří jiná molekula, proces ověří, zda je k dispozici potřebný počet
+            volných atomů příslušných typů:
+                    pokud ne, tiskne A: NAME I: waiting a čeká na chybějící procesy
+                            pokud ano (je k dispozici dvakrát hydrogen a jednou oxygen), tiskne A:
+                            NAME I: ready a začne proces tvorby molekuly (tento proces a procesy,
+                                    které tiskly waiting, přechází na bod 3)
+                            Jakmile jsou k dispozici tři vhodné atomy, zavolá každý z těchto tří
+                            procesů funkci bond, v které:
+                                tiskne A: NAME I: begin bonding
+                                    uspí proces na náhodnou dobu z intervalu <0, B>
+                                    Jakmile se atomy spojí do molekuly, tj. všechny tři procesy
+                                    dokončily funkci bond, tak poté tiske každý z těchto procesů A:
+                                    NAME I: bonded.
+                                    Procesy atomů se ukončí současně, tj. čekají, až se vytvoří
+                                    molekuly ze všech atomů. Poté každý proces atomu tiskne A: NAME
+                                    I: finished.
+                                    Omezující podmínky: Pokud se tvoří molekula (body 2.b.II, 3 a
+                                            4), nesmí další procesy provádět totéž, tj. v jednom
+                                    okamžiku může vznikat pouze jedna molekula. Další atomy musí
+                                    počkat, dokud se úplně nedokončí předchozí molekula, tj. skončí
+                                    provádění bodu 4. Toto omezení platí pro body 2.b, 3 a 4 (při
+                                            tvorbě molekuly se nesmí objevit výstup z bodů 2.b, 3 a
+                                            4 z atomů jiné molekuly).
+
