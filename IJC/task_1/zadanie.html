@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-language" content="cs">
+<title>Jazyk C: DU1 </title>
+</head>
+
+<h1>Jazyk C: DU1</h1>
+
+<hr>
+<xmp>
+
+Jazyk C                    DU1                         20.2.2012
+----------------------------------------------------------------
+
+
+                      Domácí úkol č.1
+
+
+Termín odevzdání:  20.3.2012
+ čtěte pokyny na konci tohoto textu
+ Hodnocení max. 15 bodů
+
+Příklady: (budou opravovány v prostředí Linux/GCC,
+           LC_ALL=cs_CZ.iso-8859-2
+           parametry překladu: -O2 -std=c99 -Wall -pedantic)
+
+a) V rozhraní "bit-array.h" definujte makra
+   pro pole bitů:
+     BitArray(jmeno_pole,velikost)
+       definuje a nuluje pole (POZOR: MUSÍ _INICIALIZOVAT_ bez ohledu
+       na to, zda je pole statické nebo automatické/lokální!
+       Vyzkoušejte si obě varianty, použijte lokální.)
+       Př: BitArray(p,1000L);   // p = pole 1000 bitů
+           BitArray(q,10000L);  // q = pole 10000 bitů
+
+     typedef BitArray_t
+       Typ bitového pole (pro předávání parametru do funkce)
+
+     BitArraySize(jmeno_pole)
+       vrátí velikost pole v bitech
+
+     SetBit(jmeno_pole,index,výraz)
+       nastaví zadaný bit v poli na hodnotu zadanou výrazem
+       (nulový výraz --&gt; bit 0, nenulový výraz --&gt; bit 1)
+       Př: SetBit(p,20,1);
+
+     GetBit(jmeno_pole,index)
+       získá hodnotu zadaného bitu, vrací hodnotu 0 nebo 1
+       Př: if(GetBit(p,i)==1) printf("1");
+           if(!GetBit(p,i))   printf("0");
+
+   Kontrolujte meze polí. V případě chyby volejte funkci
+     FatalError("Index %ld mimo rozsah 0..%ld", (long)index, (long)mez).
+   (Můžete použít modul error.c/error.h z příkladu b)
+
+   Program musí fungovat na 32 (gcc -m32) i 64bitové platformě.
+
+   Napište pomocná makra DU1_GET_BIT_(p,i), DU1_SET_BIT_(p,i,b)
+   pro indexování bitů v poli T *p nebo T p[N] bez kontroly mezí,
+   kde T je libovolný celočíselný typ (char, unsigned short, ...).
+   Pro implementaci použijte pole typu: unsigned long [].
+   Implementace musí efektivně využívat paměť (využít každý
+   bit pole až na posledních max X-1, pokud má unsigned long X bitů).
+
+   Podmíněným překladem zajistěte, aby se při definovaném symbolu
+   USE_INLINE místo těchto maker definovaly inline funkce
+   všude kde je to možné (bez změn v následujícím testovacím příkladu!).
+   (Pozor na nestandardní sémantiku inline funkcí v GCC starším než verze 4.3
+   viz "http://gcc.gnu.org/c99status.html". Použijte gcc 4.4+)
+   USE_INLINE nesmí být definováno ve zdrojovém textu --
+   překládá se s argumentem -D (gcc -DUSE_INLINE ...).
+
+   Jako testovací příklad implementujte funkci, která použije algoritmus známý
+   jako Eratosthenovo síto (void Eratosthenes(BitArray_t pole);) a použijte ji
+   pro výpočet posledních 10 prvočísel ze všech prvočísel od 2 do
+   N=99000000 (99 milionů).   
+
+   Budete pravděpodobně potřebovat zvětšit limit velikosti zásobníku.
+   Na Unix-like systémech použijte příkaz ulimit -a pro zjištění velikosti
+   limitu a potom ulimit -s. Doporučuji nejdříve odladit pro N=100.
+
+   Každé prvočíslo tiskněte na zvláštní řádek v pořadí
+   vzestupném.  Netiskněte  nic  jiného  než  prvočísla (bude se
+   automaticky  kontrolovat!).  Pro kontrolu správnosti prvočísel
+   můžete použít program  factor (./prvocisla|factor).
+
+   Zdrojový text programu se musí jmenovat "prvocisla.c" ! 
+   Příkaz "make" musí vytvořit obě varianty: prvocisla a prvocisla-inline
+   (Při nesplnění podmínek: až 0 bodů.)
+
+(7b)
+
+Poznámky:  Eratosthenovo síto (přibližná specifikace):
+   1) Nulujeme bitové pole  p  o rozměru N, index i nastavit na 2
+   2) Vybereme nejmenší index i, takový, že p[i]==0. Potom je
+      i prvočíslo
+   3) Pro všechny násobky i nastavíme bit p[n*i] na 1
+      ('vyškrtneme' násobky - nejsou to prvočísla)
+   4) i++; dokud nejsme za sqrt(N), opakujeme 2 až 4
+      (POZOR: sestavit s matematickou knihovnou, případně zapnout optimalizace)
+   5) Výsledek: v poli p jsou na prvočíselných indexech hodnoty 0
+
+   Efektivita výpočtu: cca 1.5s na Core2duo/2.8GHz/Linux64 (gcc -O2)
+   Porovnejte efektivitu obou variant.
+
+</xmp>
+<hr>
+<xmp>
+
+b) Napište modul "error.c" s rozhraním v "error.h", který definuje
+   funkci void Error(const char *fmt, ...) a
+   funkci void FatalError(const char *fmt, ...). Tyto funkce mají
+   stejné parametry jako printf(); tisknou text "CHYBA: " a potom
+   chybové hlášení podle formátu fmt. Vše se tiskne do stderr
+   (funkcí vfprintf) a potom FatalError ukončí program voláním
+   funkce exit(1).  Použijte definice ze stdarg.h.
+
+ * Napište modul "ppm.c" s rozhraním "ppm.h",
+   ve kterém definujete typ:
+     struct ppm {
+        unsigned xsize;
+        unsigned ysize;
+        char data[];    // RGB bajty, celkem 3*xsize*ysize
+     };
+   a funkce:
+     struct ppm * ppm_read(const char * filename);
+        načte obsah PPM souboru do touto funkcí dyanmicky
+        alokované struktury. Při chybě formátu použije funkci Error
+        a vrátí NULL.  Pozor na "memory leaks".
+
+     int ppm_write(struct ppm *p, const char * filename);
+        zapíše obsah struktury p do souboru ve formátu PPM.
+        Při chybě použije funkci Error a vrátí záporné číslo.
+
+     Můžete doplnit další funkce, ale pro DU1 to není nutné.
+
+    Popis formátu PPM najdete na Internetu, implementujte pouze
+    binární variantu P6 s barvami 0..255 bez komentářů:
+      "P6" &lt;ws&gt;+
+      &lt;xsizetxt&gt; &lt;ws&gt;+ &lt;ysizetxt&gt; &lt;ws&gt;+
+      "255" &lt;ws&gt;
+      &lt;bin 3*xsize*ysize bajtu RGB dat&gt;
+
+  * Napište testovací program "steg-decode.c", kde ve funkci main načtete ze
+    souboru zadaného jako jediný argument programu zadaný obrázek ve formátu
+    PPM a v něm najdete v datech obrázku uloženou "tajnou" zprávu. Zprávu
+    vytisknete na stdout.
+    Zpráva je řetězec znaků (včetně '\0') uložený po jednotlivých bitech
+    (počínaje LSb) na nejnižších bitech (LSb) vybraných bajtů barevných složek
+    v datech obrázku. Dekódování ukončete po dosažení '\0' nebo překročení
+    mezí pole dat.  Pro DU1 budou vybrané bajty určeny prvočísly -- použijte
+    Eratostenovo síto jako v příkladu "prvocisla.c".  Program použije
+    FatalError v případě chyby čtení souboru atd.
+
+    Použijte program "make" pro překlad/sestavení programu.
+    Testovací příkaz:  ./steg-decode du1-obrazek.ppm
+
+    Zájemci si mohou vytvořit i program "steg-encode.c" (nehodnotí se).
+
+(8b)
+
+   Zařiďte, aby příkaz "make" bez parametrů vytvořil všechny spustitelné
+   soubory pro DU1.  Při změně kteréhokoli souboru musí přeložit jen změněný
+   soubor a závislosti. Pokud bude Makefile vypadat jako skript odečtou se 4b.
+
+</xmp>
+Testovací obrázek: <a href="https://web.archive.org/web/20120630191708/http://www.fit.vutbr.cz:80/study/courses/IJC/public/du1-obrazek.ppm">du1-obrazek.ppm</a>
+<hr>
+<hr>
+<xmp>
+
+Předmět: Jazyk C                                  rev 19.2.2012
+
+Obecné pokyny pro vypracování domácích úkolů
+
+*  Pro úkoly v jazyce C používejte ISO C99 (soubory *.c)
+   Použití nepřenositelných konstrukcí není dovoleno.
+   C11 nebudete potřebovat.
+
+*  úkoly zkontrolujte překladačem například takto:
+      gcc -std=c99 -pedantic -Wall priklad1.c
+   místo gcc můžete použít i jiný překladač
+!  (nebude-li úkol podle normy ISO C99, bude za 0 bodů!)
+   v  souvislosti s tím napište do poznámky na začátku
+   souboru jméno překladače, kterým byl program přeložen
+   (implicitní je verze GNU C instalovaná na serveru merlin).
+
+*  Programy  pište, pokud je to možné, do jednoho zdrojového
+   souboru. Dodržujte předepsaná jména souborů.
+
+*  Na začátek každého souboru napište poznámku, která bude
+   obsahovat jméno, fakultu, označení příkladu a datum.
+
+Příklad:
+  // enum.c
+  // Řešení IJC-DU1, příklad a), 30.2.2111
+  // Autor: Josef Švejk, FIT
+  // Přeloženo: gcc 4.4
+  // popis příkladu - poznámky, atd
+
+* Úkoly je nutné zabalit programem zip takto:
+       zip xnovak99.zip *.c *.h Makefile
+
+  Jméno xnovak99 nahradíte vlastním. ZIP neobsahuje adresáře.
+  Každý si zkontroluje obsah ZIP archivu jeho rozbalením v prázdném adresáři
+  a napsáním "make".
+
+* Řešení se odevzdává elektronicky v IS FIT
+
+* Posílejte pouze nezbytně nutné soubory -- ne *.EXE !
+
+* Úkoly neodevzdané v termínu budou za 0 bodů.
+
+* Opsané úkoly budou hodnoceny 0 bodů pro všechny zůčastněné
+  a to bez výjimky (+ bonus v podobě návštěvy u disciplinární komise).
+
+
+</xmp>
+<hr>
+<address>
+Poslední modifikace: <!-- begin flastmod -->
+20. února 2012<!-- end -->
+<br>
+Pokud naleznete na této stránce chybu, oznamte to dopisem na adresu
+peringer AT fit.vutbr.cz
+</address>
+
+
+
+
+
+
+
+
+
+
+</body></html>
+<!--
+     FILE ARCHIVED ON 19:17:08 jún 30, 2012 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 19:52:05 jan 30, 2017.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
