@@ -17,3 +17,4 @@ IJC no.1 | 12/15 | Macros do not meet assignment and refuses valid picture
 IJC no.2 | 15/15 |
 IAL no.1 | 10/10 |
 IAL no.2 | 10/10 |
+IFJ | 25/20 | https://github.com/ondrejbudai/ifj
