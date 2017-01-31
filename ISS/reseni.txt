@@ -1,0 +1,5 @@
+chyba=12.087
+mean_no_his=173.3897
+std_no_his=63.5581
+mean_his=173.2051
+mean_his=63.89886
