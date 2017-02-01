@@ -27,3 +27,4 @@ IPK no.2 | 15/15 |
 IPP no.1 | 10/10 |
 IPP no.2 | 12/10 |
 IZG | 16/18 | Forgotten debugging info caused SIGSEGV sometimes
+IZG | 80/100 | https://github.com/ondrejbudai/othello
