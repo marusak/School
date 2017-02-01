@@ -21,3 +21,4 @@ IFJ | 25/20 | https://github.com/ondrejbudai/ifj
 INP | 11/13 | Wrong use of synchronization signal
 INP | 20/20 |
 ISS | 10/12 | File does not contain EOF
+IDS | 19/19 |
