@@ -29,3 +29,7 @@ IPP no.2 | 12/10 |
 IZG | 16/18 | Forgotten debugging info caused SIGSEGV sometimes
 IZG | 80/100 | https://github.com/ondrejbudai/othello
 IIS | 30/30 | https://github.com/ondrejbudai/roores
+IMP | 12/14 | Not enough comments in the code
+IMS | 20/20 | https://github.com/marusak/bakesim
+ISA | 12/15 | Mainly documentation, missing IPv6, sometimes accepts non-valid certificate
+ITU | 49/55 | https://github.com/ondrejbudai/photogallery
