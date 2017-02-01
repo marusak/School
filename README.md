@@ -23,3 +23,4 @@ INP | 20/20 |
 ISS | 10/12 | File does not contain EOF
 IDS | 19/19 |
 IPK no.1 | 15/15 |
+IPK no.2 | 15/15 |

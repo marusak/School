@@ -1,0 +1,59 @@
+                     README pre IPK projekt - prenos suborov
+-------------------------------------------------------------------------------
+Preklad:
+    ./make
+
+SERVER:
+    Spustenie:
+        ./server -p port
+        port - cislo vacsie ako nula, idealne v rozsahu <1024, 65536>
+
+    Pouzitie:
+        Server bezi v nekonecnej smycke, jeho ukoncenie je potrebne vyvolat.
+        Poskytuje data z aktualneho adresara, v ktorom bol spusteni.
+        Data uklada do akrualneho adresara, z ktoreho bol spusteni.
+
+    Navratova hodnota:
+        V pripade chyby pri spusteni je vratena hodnota != 0 + vypis na stderr
+        Vid "Bezne chybove kody"
+
+    Obmedzenia:
+        Pracuje len so subormi v aktualnom adresari
+        Podpora len IPv4
+
+
+CLIENT:
+    Spustenie:
+        ./client -p port -h hostname -u|d filename
+        port - cislo portu na ktorom bezi server
+        hostname - meno hosta, ak lokalne localhost
+        filename - nazov suboru, s ktorym sa bude pracovat
+
+    Pouzitie:
+        Client vykona jednu operaciu a skonci.
+        Prepinac -u nahra data z adresaru klienta do adresaru servru
+        Prepinac -d stiahne data z adresaru servru do adresara klienta
+
+    Navratove hodnota:
+        Navratova hodnota 0 je uspech, ine su neuspech + vypis na stderr
+        Vid "Bezne chybove kody"
+
+    Obmedzenia:
+        Pracuje len so subormi v aktualnom adresari
+        Podpora len IPv4
+
+BEZNE CHYBOVE KODY:
+    1 -  Zle argumenty
+    2 -  Nevie sa pripojit na port
+    3 -  Nevie pracovat s hostom zadanym parametrom
+    4 -  Neexzistuje/neviem otvorit subor na poslanie/ulozenie
+    5 -  Server odpoveda - Neexzistuje/neviem otvorit subor na poslanie/ulozenie
+    6 -  Chyba pri vytvarani socketu
+    7 -  Chyba pri nadviazni spojenia
+    8 -  Chyba pri odoslani dat
+    9 -  Chyba pri prijati dat
+
+AUTOR:
+    Matej Marusak
+     April 2016
+   pre VUT FIT, Brno
