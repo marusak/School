@@ -1,0 +1,92 @@
+\documentclass[a4paper, 11pt] {article}
+
+\usepackage{times}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1.5cm,text={18cm, 25cm},top=2.5cm]{geometry}
+
+\usepackage{amsmath, amsthm, amssymb}
+\bibliographystyle{czplain}
+
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+\newtheorem{definicia}{Definice}[section]
+\newtheorem{algoritmus}[definicia]{Algoritmus}
+\newtheorem{veta}{Věta}
+
+
+
+{\Huge \textsc{Fakulta informačních technologií\\
+Vysoké učení technické v~Brně}}\\
+
+\vspace{\stretch{0.382}}
+
+{\LARGE
+	Typografie a publikování\,--\,4. projekt\\
+	Bibliografické citácie\\
+}
+
+\vspace{\stretch{0.618}}
+\end{center}
+
+{\LARGE 2017    \hfill     Matej Marušák}
+\end{titlepage}
+
+\section{Úvod}
+Typografia je umenie a technika aranžovania písma. Rovnako ako rečnícke schopnosti osoby, tak aj kvalita písomného prejavu dokáže ovplyvniť ako ľudia reaguju na našu správu\cite{pow_typo}. Aby sme mohli ovládať náš písomný prejav aj pri sadzbe dokumentov na počítači, bol vyvinutý nástroj \TeX.
+
+\section{Systém \TeX}
+Voľne šíriteľný nástroj \TeX ktorého autorom je Donald E. Knuth zo Stanfortskej univerzity je vyvrcholením snahy o dokonalú počítačovú sadzu odborných textov. Pôvod slova \TeX vysvetľuje sám autor v \cite{knuth} nasledovne:
+\begin{quotation}
+
+Anglické slová ako \uv{technology} pochádzajú z grétskeho základu začínajúceho s písmenami $\tau\epsilon\chi...$; a to isté grétske slovo znamená umenie ako aj technológie. Odtiaľ meno \TeX, ktoré je veľkými písmenami  $\tau\epsilon\chi$.
+\end{quotation}
+
+Systém obsahuje viac ako 300 príkazov, ktorými sa okrem iného dajú upravovať a vytvárať nové vlastnosti. Vďaka tomu boli vytvorené nadstavby, ktoré umožňujú jednoduchší a prirodzenejší zápis textu. Tento proces mi môžme predstaviť ako tvorba vyšších programovacích jazykov, ktoré obsahujú zložitejšie funkcie, avšak tieto funkcie sú zapísané v jazyku nižšom\cite{rybicka}.
+
+Tento nástroj je natoľko populárny, že vznikajú nespočetné webové stránky a fóra ale i časopisy. Medzi významné, i keď dnes už nevychádzajúce časopisy patrí PracTex\cite{practex} alebo domáca Typografia	\cite{typografia}.
+
+\section{Nadstavba \LaTeX}
+Najznámejšou nadstavbou je pravdepodobne \LaTeX, ktorý bol vytvorený Leslie Lamportom. Táto nadstavba sa prevažne využíva na tvorbu stredných až veľkých technických a vedeckých prác avšak je ju možné využiť takmer na tvorbu akéhokoľvek dokumentu. Myšlienkou \LaTeX-u je podporovať autorov k zameraniu sa pri tvorbe na obsah a nie na vzhľad písaného dokumentu \cite{latex_webpage}. 
+
+\LaTeX sa stal natoľko populárnou nadstavbou, že často je práve označenie \LaTeX používané ako synonymum pre \TeX. Jednoduché a výstižné vysvetlenie rozdielu je možné nájsť v podsekcii \ref{tex_vs_latex}.
+
+\subsection{\TeX verzus \LaTeX}
+\label{tex_vs_latex}
+Užívatelia \LaTeX-u často nepoznajú rozdiel medzi \TeX-om a \LaTeX-om. \TeX je program na sadzbu textu, zatiaľ čo \LaTeX je sada makier pre \TeX. Na tieto makrá sa môžme pozerať aj ako na knižnicu príkazov\cite{mks}.
+
+
+\section{Nástroje na tvorbu dokumentu}
+Nástroje môžme rozdeliť na offline a online podľa potreby pripojenia k internetu. Porovnanie editorov je možné nájsť na \cite{prekladace_wiki}.	
+
+\subsection{Offline nástroje}
+Bežným prístupom je vytváranie dokumentov lokálne na počítači. Avšak programy pre tvorbu nie sú príliš rozšírené a známe ako je to napríklad s textovým procesorom Word. Samotný editor nie je dostačujúci a je potrebné nainštalovať aj daľšie súčasti a rozšírenia. Takáto inštalácia a konfigurácia nie je pre bežného užívateľa triviálna záležitosť\cite{sokol}.
+
+
+\subsection{Online nástroje}
+V poslednej dobe vznikajú viaceré nástroje na tvorbu \LaTeX dokumentov priamo v internetovom prehliadači. Umožňujú zdielanú tvorbu, či už jedným autorom na viacerých počítačoch, tak aj viacerých autorov spolu. Takéto nástroje umožňujú jednoduchšiu tvorbu dokumentov v \LaTeX-u, zbavujú hlavne začínajúcich autorov frustrácie zo zle nastaveného prostredia a chýbajúcich súčasti a umožnujú kolektívnu spoluprácu\cite{online_tex}. Medzi známe online editory dnes patri ShareLatex\footnote{Dostupné na: https://www.sharelatex.com/} alebo Overleaf\footnote{Dostupné na: https://www.overleaf.com/}.
+
+\section{Čeština v \LaTeX-u}
+Podpora češtiny v \LaTeX-u vyžaduje 3 veci:
+\begin{itemize}
+\item Kódovanie - Je vhodné vybrať UTF8. Na to môžme použiť príkaz \begin{verbatim}\usepackage[utf8]{inputenc}
+\end{verbatim}
+\item České odlišnosti - Čeština sa líši vo viacerých ohľadoch voči angličtine. Pridaním 
+\begin{verbatim}
+\usepackage[czech]{babel}
+\end{verbatim}
+tieto zmeny zapneme. Okrem toho obsahuje napríklad aj spôsob delenia slov.
+\item Bibliografia podľa ČSN - Je vhodné použiť špeciálne štýly pri tvorbe bibliografie, aby odpovedala aktuálnym normám. Jeden taký štýl bol vytvorený v \cite{czplain_bp}
+\end{itemize} 
+
+
+
+\newpage
+\renewcommand{\refname}{Referencie}
+\bibliography{bibliografia}
+
+
+\end{document}
