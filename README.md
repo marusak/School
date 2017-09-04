@@ -37,3 +37,4 @@ ITY no.1 | 10/10 |
 ITY no.2 | 15/15 |
 ITY no.3 | 14/15 | Not used 'today', different LATEX
 ITY no.4 | 14/15 | Citations not in Czech (Slovak), no spaces before cite
+ITY no.5 | 15/15 |
