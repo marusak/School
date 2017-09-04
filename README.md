@@ -34,3 +34,6 @@ IMS | 20/20 | https://github.com/marusak/bakesim
 ISA | 12/15 | Mainly documentation, missing IPv6, sometimes accepts non-valid certificate
 ITU | 49/55 | https://github.com/ondrejbudai/photogallery
 ITY no.1 | 10/10 |
+ITY no.2 | 15/15 |
+ITY no.3 | 14/15 | Not used 'today', different LATEX
+ITY no.4 | 14/15 | Citations not in Czech (Slovak), no spaces before cite
