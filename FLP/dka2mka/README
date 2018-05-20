@@ -1,0 +1,44 @@
+# Minimization of DFA in Haskell
+
+    Take deterministic finite state automaton and convert it to minimized FSA.
+
+### Prerequisites
+
+    ghc (Glasgow Haskell Compiler)
+
+### Compiling
+    make
+    To pass argument to ghc, it is possible to use
+    make ARGS="..." where ... can be any argument accepted by ghc
+
+### Running
+    dka-2-mka -i|-t [input_file]
+    -i          only print input file
+    -t          minimize input automaton
+    filename    path to file containing DKA
+                if missing, use stdin
+
+## Input file format
+    s1,s2,s3...\n
+    si\n
+    se1,se2,se3...\n
+    sr1,a1,se1\n
+    sr2,a2,se2\n
+    ....
+
+    where sX is state and aX is symbol.
+    First line is set of states. Second line is initial state.
+    Third line contains end states. Other lines contain rules, one rule for line.
+
+## Running the tests
+
+    This program was tested on https://github.com/Bihanojko/dka-2-mka-tests
+    For testing follow README for tests. Normalization script is `normalize.py`.
+
+## Authors
+
+    Matej Marusak - xmarus06
+
+## Acknowledgments
+
+    This was created as school project at VUT FIT for FLP.
