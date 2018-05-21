@@ -1,0 +1,45 @@
+# Finding all spanning trees in undirected graphs in Prolog
+
+    Take connected graph and print all spanning trees.
+
+### Prerequisites
+
+    swipl (SWI Prolog)
+
+### Compiling
+    make
+    To pass argument to swipl, it is possible to use
+    make ARGS="..." where ... can be any argument accepted by swipl
+
+### Running
+    flp18-log < <input graph>
+
+## Input graph format
+    <V> <V>\n
+    <V> <V>\n
+    ....
+
+    where V's are in [A-Z] and mark vertices. One line means that the given vertices
+    are connected with edge.
+
+## Output graph format
+    <V1>-<V2> <V3>-<V4> ... <Vn-1>-<Vn>\n
+    <V11>-<V12> <V13>-<V14> ... <V1n-1>-<V1n>\n
+    ...
+
+    where Vi's are in [A-Z] and mark vertices. Two vertices connected by `-`
+    mark edge. Each line describes one spanning tree.
+
+## Running the tests
+
+    This program was tested on https://github.com/Bihanojko/SpanningTreeTests
+    and tests in /tests, which I created and sent as pull request to the mentioned
+    testing program.
+
+## Authors
+
+    Matej Marusak - xmarus06
+
+## Acknowledgments
+
+    This was created as school project at VUT FIT for FLP.
