@@ -44,3 +44,4 @@ ROBa | 22/25 | https://github.com/marusak/DRS
 FLP1 | 15/12 |
 FLP2 | 8/8 |
 AGS | 19/20 | https://github.com/marusak/MOANS
+SNT | 30/30 | https://github.com/marusak/UCTPS
