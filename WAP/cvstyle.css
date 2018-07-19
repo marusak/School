@@ -1,0 +1,94 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+}
+
+.column {
+    float: left;
+    padding: 10px;
+    height: 150vh; /*hack*/
+}
+
+.left, .right {
+  width: 15%;
+  background-color: #d1d1d1;
+}
+
+.middle {
+  width: 70%;
+  background-color: #ffffff;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.category_title {
+    font-size: 25px;
+    color: #7c7c7c;
+    padding-left: 20px;
+    margin-top: 30px;
+}
+
+.category {
+    padding-left: 80px;
+}
+
+.c_title {
+    font-size: 20px;
+    font-style: oblique;
+    font-weight: bold;
+    float: left;
+    padding-right: 50px;
+}
+
+.c_value {
+    float: right;
+    font-size: 18px;
+    font-weight: normal;
+}
+
+.c_detail {
+    font-size: 12px;
+    padding-left: 20px;
+    float: left;
+    color: #929292;
+    font-weight: normal;
+    margin-bottom: 25px;
+}
+
+.data_table {
+    min-width: 800px; /*hack*/
+}
+
+.my_name {
+    font-size: 40px;
+    padding: 80px 20px 45px 60px;
+    font-weight: lighter;
+}
+
+.cv {
+    float: left;
+}
+
+.controls {
+    float: right;
+    padding-top: 80px;
+}
+
+/* Could be in separate css, but I find it pointless for one element to create and load whole file
+ * It is mentioned in documentation what should be styled.
+ */
+#timeStampToggle {
+    position: relative;
+    left: 50%;
+    width: 200px;
+    margin-left: -75px;
+    background-color: #0fbfb0;
+}
