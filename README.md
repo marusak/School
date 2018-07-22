@@ -49,3 +49,4 @@ PRL no.1 | 7/10 | Documentation and way how time was measured
 PRL no.2 | 9/10 |
 WAP | 28/30 |
 KRY no.1 | 8/8 |
+KRY no.1 | 7/7 |
